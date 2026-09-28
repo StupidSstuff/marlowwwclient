@@ -39,9 +39,25 @@ public class ImguiLoader {
 
     private static boolean fontLoaded = false;
     private static boolean initialized = false;
+    private static boolean backendUsable = false;
     private static boolean contextCreated = false;
     private static boolean customFontAvailable = false;
     private static boolean renderedComponentsLastFrame = false;
+
+    public static boolean isUsable() {
+        return initialized && backendUsable;
+    }
+
+    private static boolean backendLinked() {
+        try {
+            java.lang.reflect.Field field = ImGuiImplGl3.class.getDeclaredField("gShaderHandle");
+            field.setAccessible(true);
+            int handle = field.getInt(imGuiGl3);
+            return handle != 0 && org.lwjgl.opengl.GL20.glGetProgrami(handle, org.lwjgl.opengl.GL20.GL_LINK_STATUS) == GL11.GL_TRUE;
+        } catch (Throwable t) {
+            return true;
+        }
+    }
 
     public static void onGlfwInit(long handle) {
         if (initialized)
@@ -67,6 +83,14 @@ public class ImguiLoader {
             imGuiPlatform.init(handle);
             imGuiGl3 = new ImGuiImplGl3();
             imGuiGl3.init("#version 150");
+            if (!backendLinked()) {
+                LOGGER.warn("ImGui GLSL 150 backend failed to link, retrying with GLSL 410");
+                imGuiGl3.dispose();
+                imGuiGl3 = new ImGuiImplGl3();
+                imGuiGl3.init("#version 410");
+            }
+            backendUsable = backendLinked();
+            if (!backendUsable) LOGGER.error("ImGui OpenGL backend failed to link; falling back to the legacy UI");
             rebuildCustomFont(atlasScale(getWindowContentScale()));
             initialized = true;
         } catch (RuntimeException | Error error) {

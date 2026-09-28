@@ -65,7 +65,7 @@ public class Menu extends Module {
         }
 
         Module legacyUI = ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("LegacyUI");
-        if (legacyUI != null && legacyUI.isToggled()) {
+        if ((legacyUI != null && legacyUI.isToggled()) || !xyz.breadloaf.imguimc.imgui.ImguiLoader.isUsable()) {
             if (ImnotcheatingyouareClient.INSTANCE.clickGui == null) {
                 ImnotcheatingyouareClient.INSTANCE.clickGui = new Clickgui();
             }
