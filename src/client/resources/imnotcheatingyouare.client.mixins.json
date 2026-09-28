@@ -31,6 +31,7 @@
 "ChatScreenMixin",
 "VisGraphMixin",
 "MouseMixin",
+"MouseScrollMixin",
 "MinecraftMixin",
 "MouseButtonEventMixin",
 "KeyboardHandlerMixin",

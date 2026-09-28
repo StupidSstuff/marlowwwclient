@@ -213,7 +213,7 @@ public class Trajectories extends Module {
                 }
             }
 
-            if (validCount > 0 && Double.isFinite(min2dX) && Double.isFinite(min2dY) && Double.isFinite(max2dX) && Double.isFinite(max2dY)) {
+            if (validCount == 8 && Double.isFinite(min2dX) && Double.isFinite(min2dY) && Double.isFinite(max2dX) && Double.isFinite(max2dY)) {
                 float ix = (float) Math.floor(min2dX);
                 float iy = (float) Math.floor(min2dY);
                 float ix2 = (float) Math.ceil(max2dX);

@@ -98,8 +98,11 @@ public final class PastelShaderBackground {
         if (texture != null && now - lastRenderNanos < 4_000_000L) return true;
         lastRenderNanos = now;
         Minecraft mc = Minecraft.getInstance();
-        int width = Math.max(1, mc.getWindow().getWidth() / 2);
-        int height = Math.max(1, mc.getWindow().getHeight() / 2);
+        int fbW = mc.getWindow().getWidth();
+        int fbH = mc.getWindow().getHeight();
+        if (fbW < 64 || fbH < 64) return texture != null;
+        int width = Math.max(1, fbW / 2);
+        int height = Math.max(1, fbH / 2);
 
         try {
             if (program == 0 && !createProgram()) {
@@ -112,6 +115,8 @@ public final class PastelShaderBackground {
                 mc.getTextureManager().register(TEXTURE_ID, texture);
                 textureWidth = width;
                 textureHeight = height;
+                if (texture.getTexture() instanceof com.mojang.blaze3d.opengl.GlTexture created)
+                    com.eclipseware.imnotcheatingyouare.client.utils.ImGuiTextures.invalidate(created.glId());
             }
             if (!(texture.getTexture() instanceof com.mojang.blaze3d.opengl.GlTexture glTexture)) {
                 failed = true;

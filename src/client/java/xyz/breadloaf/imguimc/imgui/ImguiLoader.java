@@ -39,9 +39,25 @@ public class ImguiLoader {
 
     private static boolean fontLoaded = false;
     private static boolean initialized = false;
+    private static boolean backendUsable = false;
     private static boolean contextCreated = false;
     private static boolean customFontAvailable = false;
     private static boolean renderedComponentsLastFrame = false;
+
+    public static boolean isUsable() {
+        return initialized && backendUsable;
+    }
+
+    private static boolean backendLinked() {
+        try {
+            java.lang.reflect.Field field = ImGuiImplGl3.class.getDeclaredField("gShaderHandle");
+            field.setAccessible(true);
+            int handle = field.getInt(imGuiGl3);
+            return handle != 0 && org.lwjgl.opengl.GL20.glGetProgrami(handle, org.lwjgl.opengl.GL20.GL_LINK_STATUS) == GL11.GL_TRUE;
+        } catch (Throwable t) {
+            return true;
+        }
+    }
 
     public static void onGlfwInit(long handle) {
         if (initialized)
@@ -66,7 +82,15 @@ public class ImguiLoader {
             imGuiPlatform = new SdlImGuiPlatform();
             imGuiPlatform.init(handle);
             imGuiGl3 = new ImGuiImplGl3();
-            imGuiGl3.init();
+            imGuiGl3.init("#version 150");
+            if (!backendLinked()) {
+                LOGGER.warn("ImGui GLSL 150 backend failed to link, retrying with GLSL 410");
+                imGuiGl3.dispose();
+                imGuiGl3 = new ImGuiImplGl3();
+                imGuiGl3.init("#version 410");
+            }
+            backendUsable = backendLinked();
+            if (!backendUsable) LOGGER.error("ImGui OpenGL backend failed to link; falling back to the legacy UI");
             rebuildCustomFont(atlasScale(getWindowContentScale()));
             initialized = true;
         } catch (RuntimeException | Error error) {
@@ -203,13 +227,14 @@ public class ImguiLoader {
 
     private static int targetFramebuffer = 0;
     private static int targetFramebufferTexture = 0;
+    private static java.lang.ref.WeakReference<Object> targetTextureRef = new java.lang.ref.WeakReference<>(null);
     private static int currentTargetFramebuffer = 0;
 
     private static int framebufferFor(com.mojang.blaze3d.textures.GpuTexture texture) {
         if (!(texture instanceof com.mojang.blaze3d.opengl.GlTexture glTexture) || texture.isClosed())
             return 0;
         int textureId = glTexture.glId();
-        if (targetFramebuffer != 0 && targetFramebufferTexture == textureId)
+        if (targetFramebuffer != 0 && targetFramebufferTexture == textureId && targetTextureRef.get() == texture)
             return targetFramebuffer;
         int previous = GL11.glGetInteger(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_BINDING);
         if (targetFramebuffer == 0)
@@ -218,6 +243,7 @@ public class ImguiLoader {
         org.lwjgl.opengl.GL30.glFramebufferTexture2D(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER, org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, textureId, 0);
         org.lwjgl.opengl.GL30.glBindFramebuffer(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER, previous);
         targetFramebufferTexture = textureId;
+        targetTextureRef = new java.lang.ref.WeakReference<>(texture);
         return targetFramebuffer;
     }
 
@@ -232,6 +258,9 @@ public class ImguiLoader {
             return;
         }
         if (!shouldRenderFrame())
+            return;
+        com.mojang.blaze3d.platform.Window fbWindow = net.minecraft.client.Minecraft.getInstance().getWindow();
+        if (fbWindow.getWidth() < 64 || fbWindow.getHeight() < 64)
             return;
         int framebuffer = framebufferFor(target);
         if (framebuffer == 0)
@@ -395,10 +424,7 @@ public class ImguiLoader {
         }
         io.setFontGlobalScale(loadedFontScale > 0f ? 1.0f / loadedFontScale : 1.0f);
 
-        if (Math.abs(scale - appliedUiScale) > 0.05f) {
-            ImGui.getStyle().scaleAllSizes(scale / appliedUiScale);
-            appliedUiScale = scale;
-        }
+        appliedUiScale = scale;
     }
 
     public static float getUiScale() {

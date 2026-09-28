@@ -169,7 +169,7 @@ public class StorageESP extends Module {
                 maxY = Math.max(maxY, py);
             }
         }
-        if (validCount == 0) return;
+        if (validCount < 8) return;
         if (!Double.isFinite(minX) || !Double.isFinite(minY) || !Double.isFinite(maxX) || !Double.isFinite(maxY)) return;
 
         float ix = (float) Math.floor(minX);

@@ -135,7 +135,7 @@ public class ESP extends Module {
                     if (py > maxY) maxY = py;
                 }
             }
-            if (validCount == 0) continue;
+            if (validCount < 8) continue;
             if (!Double.isFinite(minX) || !Double.isFinite(minY) || !Double.isFinite(maxX) || !Double.isFinite(maxY)) continue;
 
             float ix = (float) Math.floor(minX);
