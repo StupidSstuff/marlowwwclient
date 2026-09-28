@@ -99,6 +99,7 @@ public final class PastelShaderBackground {
         lastRenderNanos = now;
         Minecraft mc = Minecraft.getInstance();
         var size = mc.getWindow().queryFramebufferSize();
+        if (size.width() < 64 || size.height() < 64) return texture != null;
         int width = Math.max(1, size.width() / 2);
         int height = Math.max(1, size.height() / 2);
 
@@ -113,6 +114,8 @@ public final class PastelShaderBackground {
                 mc.getTextureManager().register(TEXTURE_ID, texture);
                 textureWidth = width;
                 textureHeight = height;
+                if (texture.getTexture() instanceof com.mojang.renderpearl.backend.opengl.GlTexture created)
+                    com.eclipseware.imnotcheatingyouare.client.utils.ImGuiTextures.invalidate(created.glId());
             }
             if (!(texture.getTexture() instanceof com.mojang.renderpearl.backend.opengl.GlTexture glTexture)) {
                 failed = true;

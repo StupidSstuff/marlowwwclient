@@ -4,7 +4,6 @@ import com.eclipseware.imnotcheatingyouare.client.module.Category;
 import com.eclipseware.imnotcheatingyouare.client.module.Module;
 import com.eclipseware.imnotcheatingyouare.client.utils.ModuleUtils;
 import com.eclipseware.imnotcheatingyouare.mixin.client.MinecraftAccessor;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
 
 public class KeybindWater extends Module {
@@ -48,12 +47,9 @@ public class KeybindWater extends Module {
             if (targetSlot != originalSlot) {
                 ModuleUtils.switchToSlot(targetSlot);
             }
-            step = 1;
-        } else if (step == 1) {
             ((MinecraftAccessor) mc).invokeStartUseItem();
-            mc.player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-            step = 2;
-        } else if (step == 2) {
+            step = 1;
+        } else {
             if (originalSlot >= 0 && originalSlot < 9 && originalSlot != ModuleUtils.getSelectedSlot()) {
                 ModuleUtils.switchToSlot(originalSlot);
             }

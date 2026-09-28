@@ -41,6 +41,10 @@ public final class ImGuiTextures {
         return glId;
     }
 
+    public static void invalidate(int glId) {
+        prepared.remove(glId);
+    }
+
     public static int glId(AbstractTexture texture) {
         if (texture != null && texture.getTexture() instanceof GlTexture gl && !gl.isClosed()) return gl.glId();
         return 0;

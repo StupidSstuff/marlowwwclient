@@ -66,7 +66,7 @@ public class ImguiLoader {
             imGuiPlatform = new SdlImGuiPlatform();
             imGuiPlatform.init(handle);
             imGuiGl3 = new ImGuiImplGl3();
-            imGuiGl3.init();
+            imGuiGl3.init("#version 150");
             rebuildCustomFont(atlasScale(getWindowContentScale()));
             initialized = true;
         } catch (RuntimeException | Error error) {
@@ -203,13 +203,14 @@ public class ImguiLoader {
 
     private static int targetFramebuffer = 0;
     private static int targetFramebufferTexture = 0;
+    private static java.lang.ref.WeakReference<Object> targetTextureRef = new java.lang.ref.WeakReference<>(null);
     private static int currentTargetFramebuffer = 0;
 
     private static int framebufferFor(com.mojang.renderpearl.api.textures.GpuTexture texture) {
         if (!(texture instanceof com.mojang.renderpearl.backend.opengl.GlTexture glTexture) || texture.isClosed())
             return 0;
         int textureId = glTexture.glId();
-        if (targetFramebuffer != 0 && targetFramebufferTexture == textureId)
+        if (targetFramebuffer != 0 && targetFramebufferTexture == textureId && targetTextureRef.get() == texture)
             return targetFramebuffer;
         int previous = GL11.glGetInteger(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_BINDING);
         if (targetFramebuffer == 0)
@@ -218,6 +219,7 @@ public class ImguiLoader {
         org.lwjgl.opengl.GL30.glFramebufferTexture2D(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER, org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, textureId, 0);
         org.lwjgl.opengl.GL30.glBindFramebuffer(org.lwjgl.opengl.GL30.GL_FRAMEBUFFER, previous);
         targetFramebufferTexture = textureId;
+        targetTextureRef = new java.lang.ref.WeakReference<>(texture);
         return targetFramebuffer;
     }
 
@@ -232,6 +234,9 @@ public class ImguiLoader {
             return;
         }
         if (!shouldRenderFrame())
+            return;
+        com.mojang.blaze3d.platform.Window.FramebufferSize fbSize = net.minecraft.client.Minecraft.getInstance().getWindow().queryFramebufferSize();
+        if (fbSize.width() < 64 || fbSize.height() < 64)
             return;
         int framebuffer = framebufferFor(target);
         if (framebuffer == 0)
@@ -395,10 +400,7 @@ public class ImguiLoader {
         }
         io.setFontGlobalScale(loadedFontScale > 0f ? 1.0f / loadedFontScale : 1.0f);
 
-        if (Math.abs(scale - appliedUiScale) > 0.05f) {
-            ImGui.getStyle().scaleAllSizes(scale / appliedUiScale);
-            appliedUiScale = scale;
-        }
+        appliedUiScale = scale;
     }
 
     public static float getUiScale() {

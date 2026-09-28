@@ -40,6 +40,7 @@ public class ImGuiClickGui {
     private static final ImString searchBuffer = new ImString(64);
     private static final Map<String, Float> toggleAnim = new HashMap<>();
     private static final Map<String, Float> scrollTarget = new HashMap<>();
+    private static final Map<String, Float> scrollApplied = new HashMap<>();
 
     private static float windowX = 30f;
     private static float windowY = 30f;
@@ -135,12 +136,9 @@ public class ImGuiClickGui {
 
     public static void handleBindingKey(int key) {
         if (bindingModule == null) return;
-        if (key == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE) {
-            bindingModule = null;
-            return;
-        }
         int code = key;
-        if (key == com.mojang.blaze3d.platform.InputConstants.KEY_DELETE
+        if (key == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE
+                || key == com.mojang.blaze3d.platform.InputConstants.KEY_DELETE
                 || key == com.mojang.blaze3d.platform.InputConstants.KEY_BACKSPACE) {
             code = 0;
         }
@@ -243,6 +241,7 @@ public class ImGuiClickGui {
 
         float displayW = ImGui.getIO().getDisplaySizeX();
         float displayH = ImGui.getIO().getDisplaySizeY();
+        if (displayW < 64f || displayH < 64f) return;
         if (Math.abs(displayW - lastDisplayW) > 1f || Math.abs(displayH - lastDisplayH) > 1f) {
             recomputeLayout(displayW, displayH);
         }
@@ -319,16 +318,23 @@ public class ImGuiClickGui {
     }
 
     private static void applySmoothScroll(String key) {
-        float wheel = ImGui.isWindowHovered() ? ImGui.getIO().getMouseWheel() : 0f;
+        float wx = ImGui.getWindowPosX(), wy = ImGui.getWindowPosY();
+        boolean hovered = ImGui.isMouseHoveringRect(wx, wy, wx + ImGui.getWindowWidth(), wy + ImGui.getWindowHeight(), false)
+                || ImGui.isWindowHovered(imgui.flag.ImGuiHoveredFlags.ChildWindows | imgui.flag.ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
+        float wheel = hovered ? ImGui.getIO().getMouseWheel() : 0f;
         float current = ImGui.getScrollY();
+        float max = ImGui.getScrollMaxY();
+        Float last = scrollApplied.get(key);
         float target = scrollTarget.getOrDefault(key, current);
-        if (wheel != 0f) {
-            target = clamp(target - wheel * 60f, 0f, ImGui.getScrollMaxY());
-        }
+        if (last == null || Math.abs(current - last) > 0.5f) target = current;
+        if (wheel != 0f) target -= wheel * 60f;
+        target = clamp(target, 0f, Math.max(0f, max));
         float dt = ImGui.getIO().getDeltaTime();
         float next = current + (target - current) * Math.min(1f, dt * 14f);
+        if (Math.abs(target - next) < 0.5f) next = target;
         ImGui.setScrollY(next);
         scrollTarget.put(key, target);
+        scrollApplied.put(key, next);
     }
 
     private static int pushStyleVars() {
@@ -740,7 +746,7 @@ public class ImGuiClickGui {
         if (binding) {
             dl.addText(cursor.x + 14f, cursor.y + 7f, nameCol, mod.getName());
             dl.addText(cursor.x + 14f, cursor.y + 7f + th + 2f,
-                    RenderUtils.toImGuiColor(255, 205, 90, 255), "Press a key or click...");
+                    RenderUtils.toImGuiColor(255, 205, 90, 255), "Press a key (Esc to unbind)");
         } else if (subtitle.isEmpty()) {
             dl.addText(cursor.x + 14f, cursor.y + (rowH - th) / 2f, nameCol, mod.getName());
         } else {
@@ -1099,7 +1105,7 @@ public class ImGuiClickGui {
                     boolean binding = bindingModule == mod;
                     int textCol = binding ? RenderUtils.toImGuiColor(255, 205, 90, 255)
                             : mod.isToggled() ? RenderUtils.toImGuiColor(255, 255, 255, 255) : RenderUtils.toImGuiColor(205, 198, 222, 235);
-                    String label = binding ? "Press a key..." : mod.getName();
+                    String label = binding ? "Press a key (Esc to unbind)" : mod.getName();
                     ldl.addText(c.x + 11f + hov * 2f, c.y + (PANEL_ROW - th) / 2f, textCol, label);
                     if (!ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingsByMod(mod).isEmpty()) {
                         float dx = c.x + rowW - 10f;
