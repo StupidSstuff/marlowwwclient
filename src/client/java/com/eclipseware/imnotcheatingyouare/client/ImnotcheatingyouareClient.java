@@ -86,7 +86,7 @@ Module detectionAlert = new com.eclipseware.imnotcheatingyouare.client.module.im
 Module backtrack = new com.eclipseware.imnotcheatingyouare.client.module.impl.Backtrack();
 Module pearlBind = new com.eclipseware.imnotcheatingyouare.client.module.impl.PearlBind();
 Module autoTotem = new com.eclipseware.imnotcheatingyouare.client.module.impl.AutoTotem();
-Module anchorMacro = new com.eclipseware.imnotcheatingyouare.client.module.impl.AnchorMacro();
+Module anchor = new com.eclipseware.imnotcheatingyouare.client.module.impl.Anchor();
 Module crystalAura = new com.eclipseware.imnotcheatingyouare.client.module.impl.CrystalAura();
 Module crystalHelper = new com.eclipseware.imnotcheatingyouare.client.module.impl.CrystalHelper();
 Module antibot = new com.eclipseware.imnotcheatingyouare.client.module.impl.AntiBot();
@@ -155,7 +155,7 @@ moduleManager.modules.add(killAura);
 moduleManager.modules.add(backtrack);
 moduleManager.modules.add(pearlBind);
 moduleManager.modules.add(autoTotem);
-moduleManager.modules.add(anchorMacro);
+moduleManager.modules.add(anchor);
         moduleManager.modules.add(crystalAura);
         moduleManager.modules.add(crystalHelper);
         moduleManager.modules.add(autoHitCrystal);
