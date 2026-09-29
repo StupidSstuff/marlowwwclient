@@ -327,10 +327,10 @@ public class ImGuiClickGui {
         Float last = scrollApplied.get(key);
         float target = scrollTarget.getOrDefault(key, current);
         if (last == null || Math.abs(current - last) > 0.5f) target = current;
-        if (wheel != 0f) target -= wheel * 60f;
+        if (wheel != 0f) target -= wheel * 130f;
         target = clamp(target, 0f, Math.max(0f, max));
         float dt = ImGui.getIO().getDeltaTime();
-        float next = current + (target - current) * Math.min(1f, dt * 14f);
+        float next = current + (target - current) * Math.min(1f, dt * 22f);
         if (Math.abs(target - next) < 0.5f) next = target;
         ImGui.setScrollY(next);
         scrollTarget.put(key, target);

@@ -299,14 +299,17 @@ public class SpawnerFinder extends Module {
         if (top.w <= 0.05f) return;
         float x = (top.x / top.w + 1f) * 0.5f * dw;
         float y = (1f - top.y / top.w) * 0.5f * dh;
+        if (!Float.isFinite(x) || !Float.isFinite(y) || Math.abs(x) > 20000f || Math.abs(y) > 20000f) return;
         ImVec2 size = ImGui.calcTextSize(text);
+        float tw = size.x, th = size.y;
+        if (!Float.isFinite(tw) || !Float.isFinite(th) || tw <= 0f || th <= 0f) return;
         float padX = 6f, padY = 2f;
-        float x0 = x - size.x / 2f - padX;
-        float y0 = y - size.y - padY * 2f;
-        float x1 = x + size.x / 2f + padX;
+        float x0 = x - tw / 2f - padX;
+        float y0 = y - th - padY * 2f;
+        float x1 = x + tw / 2f + padX;
         float y1 = y;
-        dl.addRectFilled(x0, y0, x1, y1, RenderUtils.toImGuiColor(10, 10, 14, 170), 4f);
-        dl.addRectFilled(x0, y1 - 2f, x1, y1, RenderUtils.toImGuiColor(r, g, b, 230), 2f);
+        dl.addRectFilled(x0, y0, x1, y1, RenderUtils.toImGuiColor(10, 10, 14, 170));
+        dl.addRectFilled(x0, y1 - 2f, x1, y1, RenderUtils.toImGuiColor(r, g, b, 230));
         dl.addText(x0 + padX + 1f, y0 + padY + 1f, RenderUtils.toImGuiColor(0, 0, 0, 200), text);
         dl.addText(x0 + padX, y0 + padY, RenderUtils.toImGuiColor(255, 255, 255, 255), text);
     }
