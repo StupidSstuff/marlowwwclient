@@ -1165,6 +1165,115 @@ public class ImGuiClickGui {
         return clicked ? !value : value;
     }
 
+    private static final java.util.Set<String> openCombos = new java.util.HashSet<>();
+
+    private static String drawComboSetting(String label, String current, List<String> options, int accentCol) {
+        ImGui.pushID(label);
+
+        float avail = ImGui.getContentRegionAvailX();
+        float th = ImGui.getFontSize();
+        ImDrawList dl = ImGui.getWindowDrawList();
+        ImVec2 lp = ImGui.getCursorScreenPos();
+
+        dl.pushClipRect(lp.x, lp.y, lp.x + avail, lp.y + th + 2f, true);
+        dl.addText(lp.x, lp.y, RenderUtils.toImGuiColor(TEXT, 1.0f), label);
+        dl.popClipRect();
+        ImGui.dummy(avail, th + 5f);
+
+        String result = current;
+        float h = 24f;
+        int trackCol = RenderUtils.toImGuiColor(TOGGLE_OFF, 1.0f);
+        int accentFill = (accentCol & 0x00FFFFFF) | (170 << 24);
+        int white = RenderUtils.toImGuiColor(255, 255, 255, 255);
+        int dim = RenderUtils.toImGuiColor(TEXT_DIM, 1.0f);
+        ImVec2 tsz = new ImVec2();
+
+        if (options.size() <= 3) {
+            ImVec2 c = ImGui.getCursorScreenPos();
+            ImGui.invisibleButton("##seg", avail, h);
+            boolean hovered = ImGui.isItemHovered();
+            boolean clicked = ImGui.isItemClicked(0);
+            float segW = avail / options.size();
+
+            dl.addRectFilled(c.x, c.y, c.x + avail, c.y + h, trackCol, 7f, ImDrawFlags.RoundCornersAll);
+            for (int i = 0; i < options.size(); i++) {
+                String opt = options.get(i);
+                float x0 = c.x + segW * i;
+                float x1 = x0 + segW;
+                boolean sel = opt.equals(current);
+                boolean segHover = hovered && ImGui.getMousePosX() >= x0 && ImGui.getMousePosX() < x1;
+                if (sel) {
+                    dl.addRectFilled(x0 + 2f, c.y + 2f, x1 - 2f, c.y + h - 2f, accentFill, 5f, ImDrawFlags.RoundCornersAll);
+                } else if (segHover) {
+                    dl.addRectFilled(x0 + 2f, c.y + 2f, x1 - 2f, c.y + h - 2f, RenderUtils.toImGuiColor(255, 255, 255, 18), 5f, ImDrawFlags.RoundCornersAll);
+                }
+                ImGui.calcTextSize(tsz, opt);
+                dl.pushClipRect(x0 + 3f, c.y, x1 - 3f, c.y + h, true);
+                dl.addText(x0 + (segW - tsz.x) / 2f, c.y + (h - tsz.y) / 2f, sel ? white : dim, opt);
+                dl.popClipRect();
+                if (clicked && segHover && !sel) result = opt;
+            }
+            ImGui.dummy(0f, 9f);
+        } else {
+            boolean open = openCombos.contains(label);
+            ImVec2 c = ImGui.getCursorScreenPos();
+            ImGui.invisibleButton("##field", avail, h);
+            boolean hovered = ImGui.isItemHovered();
+            if (ImGui.isItemClicked(0)) {
+                if (open) openCombos.remove(label); else openCombos.add(label);
+                open = !open;
+            }
+
+            dl.addRectFilled(c.x, c.y, c.x + avail, c.y + h,
+                    hovered ? RenderUtils.toImGuiColor(ROW_HOVER, 1.0f) : trackCol, 7f, ImDrawFlags.RoundCornersAll);
+            ImGui.calcTextSize(tsz, current);
+            dl.pushClipRect(c.x + 8f, c.y, c.x + avail - 24f, c.y + h, true);
+            dl.addText(c.x + 10f, c.y + (h - tsz.y) / 2f, white, current);
+            dl.popClipRect();
+
+            float ax = c.x + avail - 14f;
+            float ay = c.y + h / 2f;
+            if (open) dl.addTriangleFilled(ax - 4f, ay + 2f, ax + 4f, ay + 2f, ax, ay - 3f, dim);
+            else dl.addTriangleFilled(ax - 4f, ay - 2f, ax + 4f, ay - 2f, ax, ay + 3f, dim);
+
+            if (open) {
+                float rowH = 22f;
+                ImGui.dummy(0f, 3f);
+                ImVec2 lc = ImGui.getCursorScreenPos();
+                float panelH = rowH * options.size() + 6f;
+                dl.addRectFilled(lc.x, lc.y, lc.x + avail, lc.y + panelH, RenderUtils.toImGuiColor(ROW_BG, 1.0f), 7f, ImDrawFlags.RoundCornersAll);
+                dl.addRect(lc.x, lc.y, lc.x + avail, lc.y + panelH, RenderUtils.toImGuiColor(255, 255, 255, 22), 7f, ImDrawFlags.RoundCornersAll, 1f);
+                ImGui.setCursorScreenPos(lc.x, lc.y + 3f);
+                for (String opt : options) {
+                    ImVec2 rc = ImGui.getCursorScreenPos();
+                    ImGui.pushID(opt);
+                    ImGui.invisibleButton("##opt", avail, rowH);
+                    boolean rowHover = ImGui.isItemHovered();
+                    boolean sel = opt.equals(current);
+                    if (rowHover) {
+                        dl.addRectFilled(rc.x + 3f, rc.y, rc.x + avail - 3f, rc.y + rowH, RenderUtils.toImGuiColor(255, 255, 255, 16), 5f, ImDrawFlags.RoundCornersAll);
+                    }
+                    if (sel) {
+                        dl.addRectFilled(rc.x + 3f, rc.y + 4f, rc.x + 6f, rc.y + rowH - 4f, accentCol, 2f, ImDrawFlags.RoundCornersAll);
+                    }
+                    ImGui.calcTextSize(tsz, opt);
+                    dl.addText(rc.x + 14f, rc.y + (rowH - tsz.y) / 2f, sel ? white : RenderUtils.toImGuiColor(TEXT, 1.0f), opt);
+                    if (ImGui.isItemClicked(0)) {
+                        result = opt;
+                        openCombos.remove(label);
+                    }
+                    ImGui.popID();
+                }
+                ImGui.setCursorScreenPos(lc.x, lc.y + panelH);
+                ImGui.dummy(0f, 0f);
+            }
+            ImGui.dummy(0f, 9f);
+        }
+
+        ImGui.popID();
+        return result;
+    }
+
     private static final Map<String, Integer> rangeDrag = new HashMap<>();
 
     private static float[] drawRangeSlider(String label, float lo, float hi, float min, float max, boolean isInt, int accentCol) {
@@ -1464,20 +1573,8 @@ public class ImGuiClickGui {
                     (float) s.getMin(), (float) s.getMax(), s.onlyInt(), accentCol);
             if (r[0] != (float) s.getRangeLow() || r[1] != (float) s.getRangeHigh()) s.setRange(r[0], r[1]);
         } else if (s.isCombo()) {
-            ImGui.textDisabled(s.getName());
-            ImGui.dummy(0f, 3f);
-            ImGui.setNextItemWidth(ImGui.getContentRegionAvailX());
-            ImVec2 comboPos = ImGui.getCursorScreenPos();
-            ImGui.setNextWindowPos(comboPos.x, comboPos.y + ImGui.getFrameHeight() + 3f, ImGuiCond.Always);
-            if (ImGui.beginCombo("##v", s.getValString())) {
-                for (String opt : s.getOptions()) {
-                    boolean selected = opt.equals(s.getValString());
-                    if (ImGui.selectable(opt, selected)) s.setValString(opt);
-                    if (selected) ImGui.setItemDefaultFocus();
-                }
-                ImGui.endCombo();
-            }
-            ImGui.dummy(0f, 9f);
+            String picked = drawComboSetting(s.getName(), s.getValString(), s.getOptions(), accentCol);
+            if (!picked.equals(s.getValString())) s.setValString(picked);
         } else if (s.isColor()) {
             Color color = new Color(s.getValColor(), true);
             float[] col4 = new float[]{
