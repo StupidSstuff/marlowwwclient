@@ -94,15 +94,16 @@ public final class SdlImGuiPlatform {
         io.setKeyAlt(InputConstants.isKeyDown(InputConstants.KEY_LALT) || InputConstants.isKeyDown(InputConstants.KEY_RALT));
         io.setKeySuper(InputConstants.isKeyDown(InputConstants.KEY_LGUI) || InputConstants.isKeyDown(InputConstants.KEY_RGUI));
 
+        boolean binding = com.eclipseware.imnotcheatingyouare.client.clickgui.ImGuiClickGui.isBinding();
         for (int key : TRACKED_KEYS) {
-            io.setKeysDown(key, InputConstants.isKeyDown(key));
+            io.setKeysDown(key, !binding && InputConstants.isKeyDown(key));
         }
 
         io.setMouseWheel(pollAndResetScroll());
 
         Integer codepoint;
         while ((codepoint = pendingChars.poll()) != null) {
-            io.addInputCharacter(codepoint);
+            if (!binding) io.addInputCharacter(codepoint);
         }
     }
 

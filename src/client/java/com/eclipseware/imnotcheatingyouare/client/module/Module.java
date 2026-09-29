@@ -11,6 +11,7 @@ public class Module {
     private boolean toggled;
     private boolean wasKeyPressed;
     private boolean hidden;
+    private boolean holdMode;
     
     public static Minecraft mc;
 
@@ -73,6 +74,13 @@ public class Module {
 
         boolean isPressed = com.eclipseware.imnotcheatingyouare.client.utils.InputUtil.isDown(this.keyBind);
 
+        if (holdMode) {
+            if (isPressed && !wasKeyPressed && mc.gui.screen() == null && !this.toggled) toggle();
+            else if (!isPressed && wasKeyPressed && this.toggled) toggle();
+            wasKeyPressed = isPressed;
+            return;
+        }
+
         if (mc.gui.screen() != null) {
             wasKeyPressed = isPressed;
             return;
@@ -96,6 +104,9 @@ public class Module {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     
+    public boolean isHoldMode() { return holdMode; }
+    public void setHoldMode(boolean holdMode) { this.holdMode = holdMode; }
+
     public int getKeyBind() { return keyBind; }
     public void setKeyBind(int keyBind) { this.keyBind = keyBind; }
     
