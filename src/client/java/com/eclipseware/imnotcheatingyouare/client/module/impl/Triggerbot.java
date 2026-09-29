@@ -39,6 +39,7 @@ public class Triggerbot extends Module {
     private final Setting pauseInGui;
     private final Setting delay;
     private final Setting cooldown;
+    private final Setting critTiming;
     private final Setting antiLag;
     private final Setting missChance;
 
@@ -49,6 +50,8 @@ public class Triggerbot extends Module {
     private Plan plan = Plan.NONE;
     private float earlyNeed = 0.4f;
     private long lateExtraMs = 0L;
+    private float cooldownRoll = 0.78f;
+    private int critWaitTicks = 0;
 
     public Triggerbot() {
         super("Triggerbot", Category.Combat);
@@ -61,7 +64,11 @@ public class Triggerbot extends Module {
         pauseOnMining = new Setting("Pause On Mining", this, false);
         pauseInGui = new Setting("Pause in GUI", this, true);
         delay = new Setting("Delay (ms)", this, 25.0, 75.0, 0.0, 300.0, true);
-        cooldown = new Setting("Cooldown %", this, 78.0, 30.0, 100.0, true);
+        cooldown = new Setting("Cooldown %", this, 78.0, 100.0, 30.0, 100.0, true);
+        java.util.ArrayList<String> critModes = new java.util.ArrayList<>();
+        critModes.add("None");
+        critModes.add("Smart");
+        critTiming = new Setting("Criticals Timing", this, "None", critModes);
         antiLag = new Setting("Anti-Lag", this, false);
         missChance = new Setting("Miss Chance %", this, 0.0, 0.0, 100.0, true);
 
@@ -73,6 +80,7 @@ public class Triggerbot extends Module {
         sm.rSetting(pauseInGui);
         sm.rSetting(delay);
         sm.rSetting(cooldown);
+        sm.rSetting(critTiming);
         sm.rSetting(antiLag);
         sm.rSetting(missChance);
     }
@@ -109,6 +117,7 @@ public class Triggerbot extends Module {
         readyAt = 0L;
         plan = Plan.NONE;
         lateExtraMs = 0L;
+        critWaitTicks = 0;
     }
 
     @Override
@@ -170,6 +179,7 @@ public class Triggerbot extends Module {
         if (acquiredAt == 0L) {
             acquiredAt = now;
             rollPlan(chance);
+            rollCooldown();
         }
 
         double reach = mc.player.entityInteractionRange();
@@ -184,6 +194,11 @@ public class Triggerbot extends Module {
 
         float need = plan == Plan.EARLY ? earlyNeed : requiredCooldown();
         if (mc.player.getAttackStrengthScale(0.5f) < need) {
+            readyAt = 0L;
+            return;
+        }
+
+        if (!critAllows()) {
             readyAt = 0L;
             return;
         }
@@ -225,6 +240,32 @@ public class Triggerbot extends Module {
         }
     }
 
+    private void rollCooldown() {
+        double lo = cooldown.getRangeLow();
+        double hi = cooldown.getRangeHigh();
+        double pct = hi <= lo ? lo : lo + ThreadLocalRandom.current().nextDouble() * (hi - lo);
+        cooldownRoll = (float) pct / 100.0f;
+    }
+
+    private boolean critAllows() {
+        if (!"Smart".equals(critTiming.getValString())) return true;
+        if (mc.player.onGround() || mc.player.isInWater() || mc.player.onClimbable() || mc.player.isPassenger()) {
+            critWaitTicks = 0;
+            return true;
+        }
+        boolean falling = mc.player.fallDistance > 0.0f && mc.player.getDeltaMovement().y < 0
+                && !mc.player.isSprinting() && !mc.player.hasEffect(net.minecraft.world.effect.MobEffects.BLINDNESS);
+        if (falling) {
+            critWaitTicks = 0;
+            return true;
+        }
+        if (++critWaitTicks > 10) {
+            critWaitTicks = 0;
+            return true;
+        }
+        return false;
+    }
+
     private long randomDelay() {
         int lo = (int) delay.getRangeLow();
         int hi = (int) delay.getRangeHigh();
@@ -233,7 +274,7 @@ public class Triggerbot extends Module {
     }
 
     private float requiredCooldown() {
-        float need = (float) cooldown.getValDouble() / 100.0f;
+        float need = cooldownRoll;
         if (!antiLag.getValBoolean()) return need;
 
         float pingMs = 0.0f;
