@@ -81,6 +81,7 @@ Module nametags = new com.eclipseware.imnotcheatingyouare.client.module.impl.Nam
 Module silentAim = new com.eclipseware.imnotcheatingyouare.client.module.impl.SilentAim();
 Module storageESP = new com.eclipseware.imnotcheatingyouare.client.module.impl.StorageESP();
 Module blockESP = new com.eclipseware.imnotcheatingyouare.client.module.impl.BlockESP();
+Module spawnerFinder = new com.eclipseware.imnotcheatingyouare.client.module.impl.SpawnerFinder();
 Module killAura = new com.eclipseware.imnotcheatingyouare.client.module.impl.KillAura();
 Module detectionAlert = new com.eclipseware.imnotcheatingyouare.client.module.impl.DetectionAlert();
 Module backtrack = new com.eclipseware.imnotcheatingyouare.client.module.impl.Backtrack();
@@ -151,6 +152,7 @@ moduleManager.modules.add(nametags);
 moduleManager.modules.add(silentAim);
 moduleManager.modules.add(storageESP);
 moduleManager.modules.add(blockESP);
+moduleManager.modules.add(spawnerFinder);
 moduleManager.modules.add(killAura);
 moduleManager.modules.add(backtrack);
 moduleManager.modules.add(pearlBind);

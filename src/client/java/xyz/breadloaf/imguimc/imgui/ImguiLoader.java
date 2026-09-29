@@ -42,6 +42,11 @@ public class ImguiLoader {
     private static boolean backendUsable = false;
     private static boolean contextCreated = false;
     private static boolean customFontAvailable = false;
+    private static ImFont labelFont = null;
+
+    public static ImFont getLabelFont() {
+        return labelFont != null && labelFont.isValidPtr() ? labelFont : null;
+    }
     private static boolean renderedComponentsLastFrame = false;
 
     public static boolean isUsable() {
@@ -108,6 +113,7 @@ public class ImguiLoader {
         float fontSize = Math.max(10.0f, Math.round(16.0f * scale));
 
         fontAtlas.clear();
+        labelFont = null;
 
         ImFontConfig fontConfig = new ImFontConfig();
         ImFont customFont = null;
@@ -147,6 +153,22 @@ public class ImguiLoader {
             LOGGER.warn("Failed to add custom ImGui font; using default font", t);
         } finally {
             fontConfig.destroy();
+        }
+
+        ImFontConfig labelConfig = new ImFontConfig();
+        try {
+            byte[] labelBytes = FontExtractor.getResourceBytes("assets/imnotcheatingyouare/font/rajdhani.ttf");
+            if (labelBytes != null && labelBytes.length > 0) {
+                labelConfig.setOversampleH(3);
+                labelConfig.setOversampleV(2);
+                labelConfig.setFontDataOwnedByAtlas(true);
+                labelFont = fontAtlas.addFontFromMemoryTTF(labelBytes, Math.max(12.0f, Math.round(19.0f * scale)), labelConfig);
+            }
+        } catch (Throwable t) {
+            labelFont = null;
+            LOGGER.warn("Failed to add label font", t);
+        } finally {
+            labelConfig.destroy();
         }
 
         try {
@@ -597,6 +619,7 @@ public class ImguiLoader {
         initialized = false;
         fontLoaded = false;
         customFontAvailable = false;
+        labelFont = null;
         renderedComponentsLastFrame = false;
         loadedFontScale = -1.0f;
         appliedUiScale = 1.0f;
