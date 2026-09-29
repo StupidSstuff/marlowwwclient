@@ -4,39 +4,77 @@ import com.eclipseware.imnotcheatingyouare.client.ImnotcheatingyouareClient;
 import com.eclipseware.imnotcheatingyouare.client.module.Category;
 import com.eclipseware.imnotcheatingyouare.client.module.Module;
 import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
-import com.eclipseware.imnotcheatingyouare.client.utils.cheat.AntiCheatProfile;
-import com.eclipseware.imnotcheatingyouare.client.utils.cheat.ClickConsistency;
-import com.eclipseware.imnotcheatingyouare.client.utils.cheat.GCDFix;
-
-import net.minecraft.world.InteractionHand;
+import com.eclipseware.imnotcheatingyouare.client.setting.SettingsManager;
+import com.eclipseware.imnotcheatingyouare.client.utils.FriendManager;
+import com.eclipseware.imnotcheatingyouare.client.utils.TargetFilterManager;
+import com.eclipseware.imnotcheatingyouare.mixin.client.MinecraftAccessor;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Enemy;
-import com.eclipseware.imnotcheatingyouare.client.utils.FriendManager;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Triggerbot extends Module {
+    public static boolean isTriggerbotAttacking = false;
+
     private static long lastTimePacketMs = 0;
     private static float serverTps = 20.0f;
 
-    private long targetDelayMs = 0L;
+    private enum Plan { NONE, EARLY, LATE, RANGE }
+
+    private final Setting stickyTarget;
+    private final Setting weaponOnly;
+    private final Setting requireLeftClick;
+    private final Setting ignoreFirstClick;
+    private final Setting pauseOnMining;
+    private final Setting pauseInGui;
+    private final Setting delay;
+    private final Setting cooldown;
+    private final Setting antiLag;
+    private final Setting missChance;
+
+    private Entity lastTarget;
     private long lastAttackMs = 0L;
-    private boolean wasMouseDown = false;
+    private long acquiredAt = 0L;
+    private long readyAt = 0L;
+    private Plan plan = Plan.NONE;
+    private float earlyNeed = 0.4f;
+    private long lateExtraMs = 0L;
 
     public Triggerbot() {
         super("Triggerbot", Category.Combat);
-        ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("TPS Sync", this, true));
-        ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("CritOnly", this, false));
-        ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("AirCrit", this, false));
-        java.util.ArrayList<String> critModes = new java.util.ArrayList<>();
-        critModes.add("Off"); critModes.add("Smart"); critModes.add("Strict");
-        ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("Crit Timing", this, "Off", critModes));
-        ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("Crit Max Wait", this, 8.0, 1.0, 20.0, true));
-        ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("Require Mouse Down", this, false));
-        ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("Ignore Activation Click", this, true));
-        ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("Miss Hit Chance", this, 0.0, 0.0, 100.0, false));
+        SettingsManager sm = ImnotcheatingyouareClient.INSTANCE.settingsManager;
+
+        stickyTarget = new Setting("Sticky Target", this, false);
+        weaponOnly = new Setting("Weapon Only", this, true);
+        requireLeftClick = new Setting("Require Left Click", this, false);
+        ignoreFirstClick = new Setting("Ignore First Click", this, true).visibleWhen(() -> requireLeftClick.getValBoolean());
+        pauseOnMining = new Setting("Pause On Mining", this, false);
+        pauseInGui = new Setting("Pause in GUI", this, true);
+        delay = new Setting("Delay (ms)", this, 25.0, 75.0, 0.0, 300.0, true);
+        cooldown = new Setting("Cooldown %", this, 78.0, 30.0, 100.0, true);
+        antiLag = new Setting("Anti-Lag", this, false);
+        missChance = new Setting("Miss Chance %", this, 0.0, 0.0, 100.0, true);
+
+        sm.rSetting(stickyTarget);
+        sm.rSetting(weaponOnly);
+        sm.rSetting(requireLeftClick);
+        sm.rSetting(ignoreFirstClick);
+        sm.rSetting(pauseOnMining);
+        sm.rSetting(pauseInGui);
+        sm.rSetting(delay);
+        sm.rSetting(cooldown);
+        sm.rSetting(antiLag);
+        sm.rSetting(missChance);
     }
 
     public static void onUpdateTimePacket() {
@@ -55,188 +93,204 @@ public class Triggerbot extends Module {
 
     @Override
     public void onEnable() {
-        targetDelayMs = 0L;
-        lastAttackMs = System.currentTimeMillis();
-        wasMouseDown = false;
+        resetEngagement();
+        lastTarget = null;
+        lastAttackMs = 0L;
     }
 
-    private int critWaitTicks = 0;
-
-    private boolean canCritNow() {
-        return !mc.player.onGround() && mc.player.fallDistance > 0.0f && mc.player.getDeltaMovement().y < 0
-                && !mc.player.onClimbable() && !mc.player.isInWater() && !mc.player.isPassenger()
-                && !mc.player.hasEffect(net.minecraft.world.effect.MobEffects.BLINDNESS) && !mc.player.isSprinting();
+    @Override
+    public void onDisable() {
+        resetEngagement();
+        lastTarget = null;
     }
 
-    private boolean critTimingAllows() {
-        Setting mode = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Crit Timing");
-        String m = mode != null ? mode.getValString() : "Off";
-        if (m.equals("Off")) return true;
-        if (canCritNow()) {
-            critWaitTicks = 0;
-            return true;
-        }
-        boolean airborne = !mc.player.onGround() && !mc.player.isInWater() && !mc.player.onClimbable();
-        boolean strict = m.equals("Strict");
-        if (!airborne && !strict) {
-            critWaitTicks = 0;
-            return true;
-        }
-        Setting waitS = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Crit Max Wait");
-        int maxWait = waitS != null ? (int) waitS.getValDouble() : 8;
-        if (++critWaitTicks > maxWait) {
-            critWaitTicks = 0;
-            return true;
-        }
-        return false;
+    private void resetEngagement() {
+        acquiredAt = 0L;
+        readyAt = 0L;
+        plan = Plan.NONE;
+        lateExtraMs = 0L;
     }
 
     @Override
     public void onTick() {
         if (mc.player == null || mc.level == null) return;
-        GCDFix.update(mc.options.sensitivity().get());
-        runTriggerbot();
+        run();
     }
 
-    private void runTriggerbot() {
-        if (mc.gui.screen() != null) { wasMouseDown = false; return; }
+    private void run() {
+        long now = System.currentTimeMillis();
+        boolean down = mc.options.keyAttack.isDown();
 
-        Setting reqMouseSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Require Mouse Down");
-        boolean requireMouseDown = reqMouseSetting != null && reqMouseSetting.getValBoolean();
-        boolean isMouseDown = mc.options.keyAttack.isDown();
-
-        if (requireMouseDown && !isMouseDown) {
-            wasMouseDown = false;
+        if (pauseInGui.getValBoolean() && mc.gui.screen() != null) {
+            resetEngagement();
+            return;
+        }
+        if (!weaponReady()) {
+            resetEngagement();
+            return;
+        }
+        if (requireLeftClick.getValBoolean() && !down) {
+            resetEngagement();
             return;
         }
 
-        boolean isActivationClick = isMouseDown && !wasMouseDown;
-        wasMouseDown = isMouseDown;
-
-        if (mc.hitResult == null || mc.hitResult.getType() != HitResult.Type.ENTITY) {
-            attemptMissHit();
+        HitResult hit = mc.hitResult;
+        if (pauseOnMining.getValBoolean() && down && hit != null && hit.getType() == HitResult.Type.BLOCK) {
+            resetEngagement();
             return;
         }
-        Entity target = ((EntityHitResult) mc.hitResult).getEntity();
-        if (!isValidTarget(target)) {
-            attemptMissHit();
+
+        if (lastTarget != null && (!lastTarget.isAlive() || lastTarget.isRemoved() || now - lastAttackMs > 4000L
+                || mc.player.distanceToSqr(lastTarget) > 64.0)) {
+            lastTarget = null;
+        }
+
+        double chance = missChance.getValDouble();
+        Entity target = null;
+        boolean beyondReach = false;
+
+        if (hit != null && hit.getType() == HitResult.Type.ENTITY) {
+            Entity e = ((EntityHitResult) hit).getEntity();
+            if (isValidTarget(e)) target = e;
+        }
+        if (target == null && chance > 0.0 && acquiredAt != 0L && plan == Plan.RANGE) {
+            target = extendedCandidate();
+            beyondReach = target != null;
+        }
+
+        if (target != null && stickyTarget.getValBoolean() && lastTarget != null && target != lastTarget) {
+            target = null;
+        }
+
+        if (target == null) {
+            resetEngagement();
             return;
         }
-        Setting rangeSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Range");
-        double range = rangeSetting != null ? rangeSetting.getValDouble() : 4.25;
-        if (mc.player.distanceToSqr(target) > (range * range)) return;
-        
-        float attackCooldown = mc.player.getAttackStrengthScale(0.5f);
 
-        Setting ignoreActivationSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Ignore Activation Click");
-        boolean ignoreActivation = ignoreActivationSetting != null && ignoreActivationSetting.getValBoolean();
-        if (requireMouseDown && isActivationClick && ignoreActivation) {
-            attackCooldown = 1.0f;
+        if (acquiredAt == 0L) {
+            acquiredAt = now;
+            rollPlan(chance);
         }
 
-        Setting tpsSyncSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "TPS Sync");
-        if (tpsSyncSetting != null && tpsSyncSetting.getValBoolean() && serverTps < 19.5f) {
-            float scale = 20.0f / serverTps;
-            attackCooldown *= scale;
-        }
-        if (attackCooldown < 1.0f) return;
-
-        Setting critOnlySetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "CritOnly");
-        if (critOnlySetting != null && critOnlySetting.getValBoolean()) {
-            if (mc.player.onGround() || mc.player.fallDistance <= 0.0f) {
-                return;
-            }
+        double reach = mc.player.entityInteractionRange();
+        if (plan == Plan.RANGE) {
+            double dist = Math.sqrt(mc.player.distanceToSqr(target));
+            boolean edge = beyondReach || dist >= reach - 0.35;
+            if (!edge && now - acquiredAt < 450L) return;
+        } else if (beyondReach) {
+            resetEngagement();
+            return;
         }
 
-        Setting airCritSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "AirCrit");
-        if (airCritSetting != null && airCritSetting.getValBoolean()) {
-            if (!mc.player.onGround() && mc.player.fallDistance <= 0.0f) {
-                return;
-            }
+        float need = plan == Plan.EARLY ? earlyNeed : requiredCooldown();
+        if (mc.player.getAttackStrengthScale(0.5f) < need) {
+            readyAt = 0L;
+            return;
         }
 
-        if (!critTimingAllows()) return;
+        if (readyAt == 0L) readyAt = now + randomDelay() + (plan == Plan.LATE ? lateExtraMs : 0L);
+        if (now < readyAt) return;
 
-        if (System.currentTimeMillis() - lastAttackMs >= targetDelayMs) {
-            long profileMin = AntiCheatProfile.safeTriggerMinDelayMs();
-            if (!ClickConsistency.shouldClick(profileMin, 14)) return;
-            Module hitSelectMod = ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("HitSelect");
-            if (hitSelectMod != null && hitSelectMod.isToggled() &&
-                hitSelectMod instanceof HitSelect hs && !hs.canAttack(target)) return;
-            
-            isTriggerbotAttacking = true;
-            try {
-                ((com.eclipseware.imnotcheatingyouare.mixin.client.MinecraftAccessor) mc).invokeStartAttack();
-            } finally {
-                isTriggerbotAttacking = false;
-            }
-            mc.player.resetAttackStrengthTicker();
-            
-            lastAttackMs = System.currentTimeMillis();
-            Setting minSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Min Delay (ms)");
-            Setting maxSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Max Delay (ms)");
-            int min = minSetting != null ? (int) minSetting.getValDouble() : 50;
-            int max = maxSetting != null ? (int) maxSetting.getValDouble() : 150;
-            if (min > max) { int t = min; min = max; max = t; }
-            targetDelayMs = min + (long) (Math.random() * ((max - min) + 1));
-        }
-    }
-
-    private void attemptMissHit() {
-        Setting missChanceSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Miss Hit Chance");
-        double missChance = missChanceSetting != null ? missChanceSetting.getValDouble() : 0.0;
-        if (missChance <= 0.0) return;
-
-        float attackCooldown = mc.player.getAttackStrengthScale(0.5f);
-
-        Setting tpsSyncSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "TPS Sync");
-        if (tpsSyncSetting != null && tpsSyncSetting.getValBoolean() && serverTps < 19.5f) {
-            float scale = 20.0f / serverTps;
-            attackCooldown *= scale;
-        }
-        if (attackCooldown < 1.0f) return;
-
-        if (System.currentTimeMillis() - lastAttackMs < targetDelayMs) return;
-        if (Math.random() * 100.0 >= missChance) return;
-
-        long profileMin = AntiCheatProfile.safeTriggerMinDelayMs();
-        if (!ClickConsistency.shouldClick(profileMin, 14)) return;
+        Module hitSelectMod = ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("HitSelect");
+        if (hitSelectMod != null && hitSelectMod.isToggled() && hitSelectMod instanceof HitSelect hs && !hs.canAttack(target)) return;
 
         isTriggerbotAttacking = true;
         try {
-            ((com.eclipseware.imnotcheatingyouare.mixin.client.MinecraftAccessor) mc).invokeStartAttack();
+            ((MinecraftAccessor) mc).invokeStartAttack();
         } finally {
             isTriggerbotAttacking = false;
         }
         mc.player.resetAttackStrengthTicker();
 
-        lastAttackMs = System.currentTimeMillis();
-        Setting minSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Min Delay (ms)");
-        Setting maxSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Max Delay (ms)");
-        int min = minSetting != null ? (int) minSetting.getValDouble() : 50;
-        int max = maxSetting != null ? (int) maxSetting.getValDouble() : 150;
-        if (min > max) { int t = min; min = max; max = t; }
-        targetDelayMs = min + (long) (Math.random() * ((max - min) + 1));
+        lastAttackMs = now;
+        lastTarget = target;
+        resetEngagement();
     }
 
-    public static boolean isTriggerbotAttacking = false;
+    private void rollPlan(double chance) {
+        plan = Plan.NONE;
+        if (chance <= 0.0) return;
+        ThreadLocalRandom rng = ThreadLocalRandom.current();
+        if (rng.nextDouble() * 100.0 >= chance) return;
+        switch (rng.nextInt(3)) {
+            case 0 -> {
+                plan = Plan.EARLY;
+                earlyNeed = 0.15f + rng.nextFloat() * 0.4f;
+            }
+            case 1 -> {
+                plan = Plan.LATE;
+                lateExtraMs = 150L + rng.nextLong(200L);
+            }
+            default -> plan = Plan.RANGE;
+        }
+    }
+
+    private long randomDelay() {
+        int lo = (int) delay.getRangeLow();
+        int hi = (int) delay.getRangeHigh();
+        if (hi <= lo) return Math.max(0, lo);
+        return lo + ThreadLocalRandom.current().nextInt(hi - lo + 1);
+    }
+
+    private float requiredCooldown() {
+        float need = (float) cooldown.getValDouble() / 100.0f;
+        if (!antiLag.getValBoolean()) return need;
+
+        float pingMs = 0.0f;
+        if (mc.getConnection() != null) {
+            PlayerInfo info = mc.getConnection().getPlayerInfo(mc.player.getUUID());
+            if (info != null) pingMs = info.getLatency();
+        }
+
+        float fullMs = Math.max(200.0f, mc.player.getCurrentItemAttackStrengthDelay() * 50.0f);
+        float pingCredit = (pingMs * 0.5f) / fullMs;
+        float tpsPenalty = serverTps < 19.5f ? (20.0f - serverTps) / 20.0f * 0.5f : 0.0f;
+
+        float adjusted = need - pingCredit + tpsPenalty;
+        return Math.max(0.3f, Math.min(1.0f, adjusted));
+    }
+
+    private Entity extendedCandidate() {
+        double reach = mc.player.entityInteractionRange();
+        Vec3 eye = mc.player.getEyePosition();
+        Vec3 look = mc.player.getViewVector(1.0f);
+        Vec3 end = eye.add(look.scale(reach + 1.2));
+
+        Entity best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (Entity e : mc.level.entitiesForRendering()) {
+            if (!isValidTarget(e)) continue;
+            AABB box = e.getBoundingBox().inflate(e.getPickRadius());
+            Optional<Vec3> clip = box.clip(eye, end);
+            if (clip.isEmpty()) continue;
+            double d = eye.distanceTo(clip.get());
+            if (d < bestDist) {
+                bestDist = d;
+                best = e;
+            }
+        }
+        return best;
+    }
+
+    private boolean weaponReady() {
+        if (!weaponOnly.getValBoolean()) return true;
+        String path = BuiltInRegistries.ITEM.getKey(mc.player.getMainHandItem().getItem()).getPath();
+        return path.endsWith("_sword") || path.endsWith("_axe") || path.equals("mace")
+                || path.equals("trident") || path.endsWith("_spear");
+    }
 
     public static boolean shouldCancelManualAttack() {
         if (isTriggerbotAttacking) return false;
         Module mod = ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("Triggerbot");
         if (mod == null || !mod.isToggled() || !(mod instanceof Triggerbot tb)) return false;
-        Setting req = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(mod, "Require Mouse Down");
-        if (req == null || !req.getValBoolean()) return false;
-        Setting ign = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(mod, "Ignore Activation Click");
-        if (ign == null || !ign.getValBoolean()) return false;
+        if (!tb.requireLeftClick.getValBoolean() || !tb.ignoreFirstClick.getValBoolean()) return false;
 
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
-        if (mc.hitResult == null || mc.hitResult.getType() != HitResult.Type.ENTITY) return false;
-        Entity target = ((EntityHitResult) mc.hitResult).getEntity();
-        if (!tb.isValidTarget(target)) return false;
-        Setting rangeSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(mod, "Range");
-        double range = rangeSetting != null ? rangeSetting.getValDouble() : 4.25;
-        return mc.player != null && mc.player.distanceToSqr(target) <= (range * range);
+        if (mc.player == null || mc.level == null || mc.gui.screen() != null) return false;
+        if (!tb.weaponReady()) return false;
+
+        HitResult hit = mc.hitResult;
+        return hit == null || hit.getType() != HitResult.Type.BLOCK;
     }
 
     public boolean shouldBlock(Entity target) {
@@ -245,9 +299,6 @@ public class Triggerbot extends Module {
         if (mc.hitResult == null || mc.hitResult.getType() != HitResult.Type.ENTITY) return false;
         if (target != ((EntityHitResult) mc.hitResult).getEntity()) return false;
         if (!isValidTarget(target)) return false;
-        Setting rangeSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Range");
-        double range = rangeSetting != null ? rangeSetting.getValDouble() : 4.25;
-        if (mc.player.distanceToSqr(target) > (range * range)) return false;
         if (mc.player.getAttackStrengthScale(0.0f) < 1.0f) return false;
         Module hitSelectMod = ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("HitSelect");
         if (hitSelectMod != null && hitSelectMod.isToggled() && hitSelectMod instanceof HitSelect hs) {
@@ -257,29 +308,10 @@ public class Triggerbot extends Module {
     }
 
     private boolean isValidTarget(Entity entity) {
-        if (!(entity instanceof LivingEntity)) return false;
-        if (!entity.isAlive() || entity == mc.player) return false;
-        if (com.eclipseware.imnotcheatingyouare.client.utils.TargetFilterManager.isFiltered(entity)) return false;
-        if (entity instanceof net.minecraft.world.entity.player.Player p && FriendManager.isFriend(p)) return false;
-        Setting weaponsOnlySetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Weapons Only");
-        if (weaponsOnlySetting != null && weaponsOnlySetting.getValBoolean()) {
-            net.minecraft.world.item.Item mainHand = mc.player.getMainHandItem().getItem();
-            String name = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(mainHand).getPath();
-            if (!name.contains("sword") && !name.contains("axe") && !name.contains("mace")) {
-                return false;
-            }
-        }
-        Setting playersSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Players");
-        Setting hostileSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Hostile Mobs");
-        Setting passiveSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Passive Mobs");
-        if (entity instanceof net.minecraft.world.entity.player.Player)
-            return playersSetting != null && playersSetting.getValBoolean();
-        Module npcMod = ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("NPC");
-        if (npcMod == null || !npcMod.isToggled()) return false;
-        if (entity instanceof Enemy)
-            return hostileSetting != null && hostileSetting.getValBoolean();
-        if (entity instanceof Animal || entity instanceof LivingEntity)
-            return passiveSetting != null && passiveSetting.getValBoolean();
-        return false;
+        if (!(entity instanceof LivingEntity) || entity instanceof ArmorStand) return false;
+        if (entity == mc.player || !entity.isAlive() || entity.isSpectator()) return false;
+        if (TargetFilterManager.isFiltered(entity)) return false;
+        if (entity instanceof Player p) return !FriendManager.isFriend(p);
+        return entity instanceof Enemy;
     }
 }

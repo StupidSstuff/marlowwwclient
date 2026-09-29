@@ -39,6 +39,27 @@ public class Setting {
         this.name = name; this.parent = parent; this.colorVal = defaultColor.getRGB(); this.mode = "Color";
     }
     
+    private double dval2;
+    public Setting(String name, Module parent, double lo, double hi, double min, double max, boolean onlyint) {
+        this.name = name; this.parent = parent; this.min = min; this.max = max; this.onlyint = onlyint; this.mode = "Range";
+        double a = clamp(lo), b = clamp(hi);
+        this.dval = Math.min(a, b);
+        this.dval2 = Math.max(a, b);
+    }
+
+    private java.util.function.BooleanSupplier visibleWhen = null;
+    public Setting visibleWhen(java.util.function.BooleanSupplier supplier) { this.visibleWhen = supplier; return this; }
+    public boolean isVisible() { return visibleWhen == null || visibleWhen.getAsBoolean(); }
+
+    public boolean isRange() { return this.mode.equalsIgnoreCase("Range"); }
+    public double getRangeLow() { return this.onlyint ? (int) dval : dval; }
+    public double getRangeHigh() { return this.onlyint ? (int) dval2 : dval2; }
+    public void setRange(double lo, double hi) {
+        double a = clamp(lo), b = clamp(hi);
+        this.dval = Math.min(a, b);
+        this.dval2 = Math.max(a, b);
+    }
+
     public String getName() { return name; }
     public Module getParentMod() { return parent; }
     public String getValString() { return this.sval; }

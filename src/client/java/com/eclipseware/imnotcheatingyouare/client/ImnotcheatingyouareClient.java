@@ -311,13 +311,6 @@ moduleManager.modules.add(ghostBlockMacro);
         settingsManager.rSetting(new Setting("Only Players", wTap, true));
         settingsManager.rSetting(new Setting("Jitter (ms)", wTap, 20.0, 0.0, 200.0, true));
 
-        settingsManager.rSetting(new Setting("Range", triggerbot, 4.25, 1.0, 6.0, false));
-        settingsManager.rSetting(new Setting("Min Delay (ms)", triggerbot, 50.0, 0.0, 500.0, true));
-        settingsManager.rSetting(new Setting("Max Delay (ms)", triggerbot, 150.0, 0.0, 500.0, true));
-        settingsManager.rSetting(new Setting("Weapons Only", triggerbot, true));
-        settingsManager.rSetting(new Setting("Players", triggerbot, true));
-        settingsManager.rSetting(new Setting("Hostile Mobs", triggerbot, true));
-        settingsManager.rSetting(new Setting("Passive Mobs", triggerbot, false));
 
         java.util.ArrayList<String> hsModes = new java.util.ArrayList<>();
         hsModes.add("Pause"); hsModes.add("Dynamic");

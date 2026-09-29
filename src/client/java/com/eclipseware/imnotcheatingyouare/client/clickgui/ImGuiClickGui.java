@@ -771,6 +771,7 @@ public class ImGuiClickGui {
         int count = 0;
         for (Setting s : settings) {
             if (count >= 2) break;
+            if (!s.isVisible()) continue;
             String part;
             if (s.isCheck()) {
                 if (!s.getValBoolean()) continue;
@@ -904,6 +905,7 @@ public class ImGuiClickGui {
             ImDrawList sdl = ImGui.getWindowDrawList();
             int index = 0;
             for (Setting setting : settings) {
+                if (!setting.isVisible()) continue;
                 float rowEase = easeOut((secondsSince(settingsOpenNanos) - index * 0.02f) / 0.2f);
                 index++;
                 sdl.channelsSplit(2);
@@ -1163,6 +1165,78 @@ public class ImGuiClickGui {
         return clicked ? !value : value;
     }
 
+    private static final Map<String, Integer> rangeDrag = new HashMap<>();
+
+    private static float[] drawRangeSlider(String label, float lo, float hi, float min, float max, boolean isInt, int accentCol) {
+        ImGui.pushID(label);
+
+        String valueText = isInt ? ((int) lo + " - " + (int) hi) : String.format("%.1f - %.1f", lo, hi);
+        float avail = ImGui.getContentRegionAvailX();
+        float th = ImGui.getFontSize();
+
+        ImVec2 labelPos = ImGui.getCursorScreenPos();
+        ImDrawList dl = ImGui.getWindowDrawList();
+        ImVec2 valueSize = new ImVec2();
+        ImGui.calcTextSize(valueSize, valueText);
+
+        dl.pushClipRect(labelPos.x, labelPos.y, labelPos.x + avail - valueSize.x - 4f, labelPos.y + th + 2f, true);
+        dl.addText(labelPos.x, labelPos.y, RenderUtils.toImGuiColor(TEXT, 1.0f), label);
+        dl.popClipRect();
+        dl.addText(labelPos.x + avail - valueSize.x, labelPos.y, RenderUtils.toImGuiColor(TEXT_DIM, 1.0f), valueText);
+
+        ImGui.dummy(avail, th + 4f);
+
+        float hitH = 16f;
+        float pad = 6f;
+        float trackW = Math.max(1f, avail - pad * 2f);
+        ImVec2 cursor = ImGui.getCursorScreenPos();
+        ImGui.invisibleButton("##range", avail, hitH);
+        boolean active = ImGui.isItemActive();
+        boolean clicked = ImGui.isItemClicked(0);
+
+        float range = Math.max(0.0001f, max - min);
+        float loX = cursor.x + pad + trackW * clamp((lo - min) / range, 0f, 1f);
+        float hiX = cursor.x + pad + trackW * clamp((hi - min) / range, 0f, 1f);
+
+        Integer dragging = rangeDrag.get(label);
+        if (clicked) {
+            float mx = ImGui.getMousePosX();
+            float dLo = Math.abs(mx - loX), dHi = Math.abs(mx - hiX);
+            dragging = dLo < dHi ? 0 : (dHi < dLo ? 1 : (mx < loX ? 0 : 1));
+            rangeDrag.put(label, dragging);
+        }
+        if (!active) {
+            rangeDrag.remove(label);
+            dragging = null;
+        }
+
+        float newLo = lo, newHi = hi;
+        if (active && dragging != null) {
+            float frac = clamp((ImGui.getMousePosX() - cursor.x - pad) / trackW, 0f, 1f);
+            float v = min + frac * range;
+            if (isInt) v = Math.round(v);
+            if (dragging == 0) newLo = Math.min(v, hi);
+            else newHi = Math.max(v, lo);
+        }
+
+        float drawLo = clamp((newLo - min) / range, 0f, 1f);
+        float drawHi = clamp((newHi - min) / range, 0f, 1f);
+        float x0 = cursor.x + pad + trackW * drawLo;
+        float x1 = cursor.x + pad + trackW * drawHi;
+        float trackY = cursor.y + hitH / 2f - 2.5f;
+        float trackH = 5f;
+        dl.addRectFilled(cursor.x + pad, trackY, cursor.x + pad + trackW, trackY + trackH,
+                RenderUtils.toImGuiColor(TOGGLE_OFF, 1.0f), trackH / 2f, ImDrawFlags.RoundCornersAll);
+        dl.addRectFilled(x0, trackY, Math.max(x0 + 1f, x1), trackY + trackH, (accentCol & 0x00FFFFFF) | (200 << 24), trackH / 2f, ImDrawFlags.RoundCornersAll);
+        int white = RenderUtils.toImGuiColor(255, 255, 255, 255);
+        dl.addCircleFilled(x0, cursor.y + hitH / 2f, 5.5f, white);
+        dl.addCircleFilled(x1, cursor.y + hitH / 2f, 5.5f, white);
+
+        ImGui.popID();
+        ImGui.dummy(0f, 9f);
+        return new float[]{newLo, newHi};
+    }
+
     private static float drawCustomSlider(String label, float value, float min, float max, boolean isInt, int accentCol) {
         ImGui.pushID(label);
 
@@ -1385,6 +1459,10 @@ public class ImGuiClickGui {
             float newVal = drawCustomSlider(s.getName(), val, (float) s.getMin(), (float) s.getMax(),
                     s.onlyInt(), accentCol);
             if (newVal != val) s.setValDouble(newVal);
+        } else if (s.isRange()) {
+            float[] r = drawRangeSlider(s.getName(), (float) s.getRangeLow(), (float) s.getRangeHigh(),
+                    (float) s.getMin(), (float) s.getMax(), s.onlyInt(), accentCol);
+            if (r[0] != (float) s.getRangeLow() || r[1] != (float) s.getRangeHigh()) s.setRange(r[0], r[1]);
         } else if (s.isCombo()) {
             ImGui.textDisabled(s.getName());
             ImGui.dummy(0f, 3f);

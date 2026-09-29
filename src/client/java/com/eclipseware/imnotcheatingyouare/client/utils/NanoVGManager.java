@@ -70,9 +70,9 @@ public class NanoVGManager {
     public static int getFont(long ctx) {
         if (fontId == -1 && ctx != 0) {
             try {
-                InputStream is = NanoVGManager.class.getResourceAsStream("/assets/imnotcheatingyouare/font/verdana.ttf");
+                InputStream is = NanoVGManager.class.getResourceAsStream("/assets/imnotcheatingyouare/font/rajdhani.ttf");
                 if (is == null) {
-                    is = NanoVGManager.class.getClassLoader().getResourceAsStream("assets/imnotcheatingyouare/font/verdana.ttf");
+                    is = NanoVGManager.class.getClassLoader().getResourceAsStream("assets/imnotcheatingyouare/font/rajdhani.ttf");
                 }
                 if (is != null) {
                     byte[] bytes = is.readAllBytes();
