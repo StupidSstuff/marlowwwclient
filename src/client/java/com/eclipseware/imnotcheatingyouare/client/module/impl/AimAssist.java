@@ -26,6 +26,8 @@ public class AimAssist extends Module {
 
         ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("Horizontal Speed", this, 20.0, 1.0, 100.0, false));
         ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("Vertical Speed", this, 20.0, 1.0, 100.0, false));
+        ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("Speed Curve", this, 0.0, 1.0, 0.5, 1.0));
+        ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("Curve Range", this, 30.0, 5.0, 180.0, true));
         ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("FOV", this, 60.0, 0.0, 360.0, true));
         ImnotcheatingyouareClient.INSTANCE.settingsManager.rSetting(new Setting("Range", this, 4.0, 1.0, 8.0, false));
 
@@ -146,9 +148,32 @@ public class AimAssist extends Module {
             }
         }
 
-        double hFactor = hSpeed / 100.0;
-        double vFactor = vSpeed / 100.0;
+        Setting curveSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Speed Curve");
+        Setting curveRangeSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Curve Range");
+        double curveRange = curveRangeSetting != null ? curveRangeSetting.getValDouble() : 30.0;
+        double curveScale = 1.0;
+        if (curveSetting != null && curveRange > 0.0) {
+            double angularDist = Math.sqrt(deltaYaw * deltaYaw + deltaPitch * deltaPitch);
+            curveScale = sampleCurve(curveSetting.getCurve(), Math.min(angularDist / curveRange, 1.0));
+        }
+
+        double hFactor = hSpeed / 100.0 * curveScale;
+        double vFactor = vSpeed / 100.0 * curveScale;
         MouseAimHelper.setAimRate(deltaYaw * hFactor, deltaPitch * vFactor);
+    }
+
+    private static double sampleCurve(double[] c, double x) {
+        if (x <= 0.0) return 0.0;
+        if (x >= 1.0) return 1.0;
+        double lo = 0.0, hi = 1.0, t = x;
+        for (int i = 0; i < 24; i++) {
+            t = (lo + hi) * 0.5;
+            double u = 1.0 - t;
+            double bx = 3 * u * u * t * c[0] + 3 * u * t * t * c[2] + t * t * t;
+            if (bx < x) lo = t; else hi = t;
+        }
+        double u = 1.0 - t;
+        return Math.max(0.0, 3 * u * u * t * c[1] + 3 * u * t * t * c[3] + t * t * t);
     }
 
     private Vec3 getTargetBonePos(Entity ent) {
