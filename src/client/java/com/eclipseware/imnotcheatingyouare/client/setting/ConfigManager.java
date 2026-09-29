@@ -42,7 +42,6 @@ public class ConfigManager {
                     if (s.isCheck()) settingJson.addProperty("Value", s.getValBoolean());
                     else if (s.isSlider()) settingJson.addProperty("Value", s.getValDouble());
                     else if (s.isRange()) { settingJson.addProperty("Value", s.getRangeLow()); settingJson.addProperty("Value2", s.getRangeHigh()); }
-                    else if (s.isCurve()) { double[] c = s.getCurve(); settingJson.addProperty("Value", c[0]); settingJson.addProperty("Value2", c[1]); settingJson.addProperty("Value3", c[2]); settingJson.addProperty("Value4", c[3]); }
                     else if (s.isCombo()) settingJson.addProperty("Value", s.getValString());
                     settingsArray.add(settingJson);
                 }
@@ -94,7 +93,6 @@ public class ConfigManager {
                                     if (s.isCheck()) s.setValBoolean(settingJson.get("Value").getAsBoolean());
                                     else if (s.isSlider()) s.setValDouble(settingJson.get("Value").getAsDouble());
                                     else if (s.isRange() && settingJson.has("Value2")) s.setRange(settingJson.get("Value").getAsDouble(), settingJson.get("Value2").getAsDouble());
-                                    else if (s.isCurve() && settingJson.has("Value4")) s.setCurve(settingJson.get("Value").getAsDouble(), settingJson.get("Value2").getAsDouble(), settingJson.get("Value3").getAsDouble(), settingJson.get("Value4").getAsDouble());
                                     else if (s.isCombo()) s.setValString(settingJson.get("Value").getAsString());
                                 }
                             }
@@ -127,7 +125,6 @@ public class ConfigManager {
                     if (s.isCheck()) settingJson.addProperty("Value", s.getValBoolean());
                     else if (s.isSlider()) settingJson.addProperty("Value", s.getValDouble());
                     else if (s.isRange()) { settingJson.addProperty("Value", s.getRangeLow()); settingJson.addProperty("Value2", s.getRangeHigh()); }
-                    else if (s.isCurve()) { double[] c = s.getCurve(); settingJson.addProperty("Value", c[0]); settingJson.addProperty("Value2", c[1]); settingJson.addProperty("Value3", c[2]); settingJson.addProperty("Value4", c[3]); }
                     else if (s.isCombo()) settingJson.addProperty("Value", s.getValString());
                     settingsArray.add(settingJson);
                 }
@@ -207,7 +204,6 @@ public class ConfigManager {
                                     if (s.isCheck()) s.setValBoolean(settingJson.get("Value").getAsBoolean());
                                     else if (s.isSlider()) s.setValDouble(settingJson.get("Value").getAsDouble());
                                     else if (s.isRange() && settingJson.has("Value2")) s.setRange(settingJson.get("Value").getAsDouble(), settingJson.get("Value2").getAsDouble());
-                                    else if (s.isCurve() && settingJson.has("Value4")) s.setCurve(settingJson.get("Value").getAsDouble(), settingJson.get("Value2").getAsDouble(), settingJson.get("Value3").getAsDouble(), settingJson.get("Value4").getAsDouble());
                                     else if (s.isCombo()) s.setValString(settingJson.get("Value").getAsString());
                                 }
                             }
