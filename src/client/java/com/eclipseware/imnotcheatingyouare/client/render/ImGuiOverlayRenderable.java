@@ -68,6 +68,11 @@ public class ImGuiOverlayRenderable implements Renderable {
             spawnerFinder.renderImGuiOverlay();
         }
 
+        SuspiciousChunks suspiciousChunks = (SuspiciousChunks) ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("SuspiciousChunks");
+        if (suspiciousChunks != null) {
+            suspiciousChunks.renderImGuiOverlay();
+        }
+
         WeakDevice weakDevice = (WeakDevice) ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("WeakDevice");
         if (weakDevice != null) {
             weakDevice.renderImGuiOverlay();
