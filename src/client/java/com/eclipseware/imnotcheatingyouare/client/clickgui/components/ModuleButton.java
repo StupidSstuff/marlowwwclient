@@ -27,10 +27,7 @@ public class ModuleButton extends Button {
         
         if (settings != null && !settings.isEmpty()) {
             for (Setting setting : settings) {
-                if (setting.getParentMod() != null && setting.getParentMod().getName().equalsIgnoreCase("Triggerbot") && setting.getName().equalsIgnoreCase("Ignore Activation Click")) {
-                    Setting req = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(setting.getParentMod(), "Require Mouse Down");
-                    if (req == null || !req.getValBoolean()) continue;
-                }
+                if (!setting.isVisible()) continue;
                 if (setting.isCheck()) {
                     newItems.add(new BooleanButton(setting));
                 } else if (setting.isSlider()) {

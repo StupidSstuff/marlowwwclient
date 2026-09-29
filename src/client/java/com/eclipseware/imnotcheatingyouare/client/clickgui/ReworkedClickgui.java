@@ -124,10 +124,7 @@ public class ReworkedClickgui extends Screen {
         if (settings == null) return;
 
         for (Setting s : settings) {
-            if (s.getParentMod() != null && s.getParentMod().getName().equalsIgnoreCase("Triggerbot") && s.getName().equalsIgnoreCase("Ignore Activation Click")) {
-                Setting req = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(s.getParentMod(), "Require Mouse Down");
-                if (req == null || !req.getValBoolean()) continue;
-            }
+            if (!s.isVisible()) continue;
             activeSettings.add(s);
             if (s.isCheck()) {
                 RoundedToggle t = new RoundedToggle(0, 0, 45, 20, s::getValBoolean, val -> {

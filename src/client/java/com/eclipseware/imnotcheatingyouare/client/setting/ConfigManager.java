@@ -40,6 +40,7 @@ public class ConfigManager {
                     settingJson.addProperty("Name", s.getName());
                     if (s.isCheck()) settingJson.addProperty("Value", s.getValBoolean());
                     else if (s.isSlider()) settingJson.addProperty("Value", s.getValDouble());
+                    else if (s.isRange()) { settingJson.addProperty("Value", s.getRangeLow()); settingJson.addProperty("Value2", s.getRangeHigh()); }
                     else if (s.isCombo()) settingJson.addProperty("Value", s.getValString());
                     settingsArray.add(settingJson);
                 }
@@ -89,6 +90,7 @@ public class ConfigManager {
                                 if (s != null) {
                                     if (s.isCheck()) s.setValBoolean(settingJson.get("Value").getAsBoolean());
                                     else if (s.isSlider()) s.setValDouble(settingJson.get("Value").getAsDouble());
+                                    else if (s.isRange() && settingJson.has("Value2")) s.setRange(settingJson.get("Value").getAsDouble(), settingJson.get("Value2").getAsDouble());
                                     else if (s.isCombo()) s.setValString(settingJson.get("Value").getAsString());
                                 }
                             }
@@ -119,6 +121,7 @@ public class ConfigManager {
                     settingJson.addProperty("Name", s.getName());
                     if (s.isCheck()) settingJson.addProperty("Value", s.getValBoolean());
                     else if (s.isSlider()) settingJson.addProperty("Value", s.getValDouble());
+                    else if (s.isRange()) { settingJson.addProperty("Value", s.getRangeLow()); settingJson.addProperty("Value2", s.getRangeHigh()); }
                     else if (s.isCombo()) settingJson.addProperty("Value", s.getValString());
                     settingsArray.add(settingJson);
                 }
@@ -196,6 +199,7 @@ public class ConfigManager {
                                 if (s != null) {
                                     if (s.isCheck()) s.setValBoolean(settingJson.get("Value").getAsBoolean());
                                     else if (s.isSlider()) s.setValDouble(settingJson.get("Value").getAsDouble());
+                                    else if (s.isRange() && settingJson.has("Value2")) s.setRange(settingJson.get("Value").getAsDouble(), settingJson.get("Value2").getAsDouble());
                                     else if (s.isCombo()) s.setValString(settingJson.get("Value").getAsString());
                                 }
                             }

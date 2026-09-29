@@ -46,8 +46,8 @@ public class NanoVGRenderer {
         glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
         glPixelStorei(GL_UNPACK_SKIP_IMAGES, 0);
 
-        loadFont("roboto", Identifier.parse("imnotcheatingyouare:font/verdana.ttf"));
-        loadFont("sans", Identifier.parse("imnotcheatingyouare:font/verdana.ttf"));
+        loadFont("roboto", Identifier.parse("imnotcheatingyouare:font/rajdhani.ttf"));
+        loadFont("sans", Identifier.parse("imnotcheatingyouare:font/rajdhani.ttf"));
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, unpackAlignment);
         glPixelStorei(GL_UNPACK_ROW_LENGTH, unpackRowLength);

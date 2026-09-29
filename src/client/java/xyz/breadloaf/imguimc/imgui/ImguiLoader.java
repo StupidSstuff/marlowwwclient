@@ -110,7 +110,7 @@ public class ImguiLoader {
 
         ImGuiIO io = ImGui.getIO();
         ImFontAtlas fontAtlas = io.getFonts();
-        float fontSize = Math.max(10.0f, Math.round(16.0f * scale));
+        float fontSize = Math.max(10.0f, Math.round(18.0f * scale));
 
         fontAtlas.clear();
         labelFont = null;

@@ -65,11 +65,11 @@ public class FontExtractor {
     }
 
     public static InputStream getFontStream() {
-        InputStream in = FontExtractor.class.getResourceAsStream("/assets/imnotcheatingyouare/font/verdana.ttf");
+        InputStream in = FontExtractor.class.getResourceAsStream("/assets/imnotcheatingyouare/font/rajdhani.ttf");
         if (in == null)
-            in = FontExtractor.class.getClassLoader().getResourceAsStream("assets/imnotcheatingyouare/font/verdana.ttf");
+            in = FontExtractor.class.getClassLoader().getResourceAsStream("assets/imnotcheatingyouare/font/rajdhani.ttf");
         if (in == null && Thread.currentThread().getContextClassLoader() != null)
-            in = Thread.currentThread().getContextClassLoader().getResourceAsStream("assets/imnotcheatingyouare/font/verdana.ttf");
+            in = Thread.currentThread().getContextClassLoader().getResourceAsStream("assets/imnotcheatingyouare/font/rajdhani.ttf");
         if (in == null)
             in = FontExtractor.class.getClassLoader().getResourceAsStream("assets/krs/arial.ttf");
         if (in == null)
