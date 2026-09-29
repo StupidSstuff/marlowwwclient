@@ -681,6 +681,118 @@ public class ImGuiClickGui {
         ImGui.dummy(rowW, th + 8f);
     }
 
+    private static final String BIND_POPUP = "##bindctx";
+    private static Module bindPopupModule = null;
+
+    private static float bindPillWidth(Module mod, boolean showEmpty) {
+        String text = bindPillText(mod, showEmpty);
+        if (text.isEmpty()) return 0f;
+        ImVec2 sz = new ImVec2();
+        ImGui.calcTextSize(sz, text);
+        return sz.x + 14f;
+    }
+
+    private static String bindPillText(Module mod, boolean showEmpty) {
+        int code = mod.getKeyBind();
+        if (code == 0) return showEmpty ? "+" : "";
+        String name = InputUtil.getName(code);
+        return mod.isHoldMode() ? name + " \u00B7 H" : name;
+    }
+
+    private static boolean drawBindPill(Module mod, float rightX, float topY, float rowH, boolean showEmpty, int accentCol) {
+        String text = bindPillText(mod, showEmpty);
+        if (text.isEmpty()) return false;
+
+        ImVec2 sz = new ImVec2();
+        ImGui.calcTextSize(sz, text);
+        float pw = sz.x + 14f;
+        float ph = Math.min(rowH - 8f, sz.y + 6f);
+        float px = rightX - pw;
+        float py = topY + (rowH - ph) / 2f;
+
+        ImVec2 saved = ImGui.getCursorScreenPos();
+        ImGui.setCursorScreenPos(px, py);
+        ImGui.invisibleButton("##bindpill", pw, ph);
+        boolean hovered = ImGui.isItemHovered();
+        boolean leftClick = ImGui.isItemClicked(0);
+        boolean rightClick = ImGui.isItemClicked(1);
+        ImGui.setCursorScreenPos(saved.x, saved.y);
+
+        boolean bound = mod.getKeyBind() != 0;
+        boolean binding = bindingModule == mod;
+        ImDrawList dl = ImGui.getWindowDrawList();
+        int fill = binding ? RenderUtils.toImGuiColor(255, 205, 90, 60)
+                : bound ? ((accentCol & 0x00FFFFFF) | ((hovered ? 90 : 60) << 24))
+                : RenderUtils.toImGuiColor(255, 255, 255, hovered ? 30 : 14);
+        int border = binding ? RenderUtils.toImGuiColor(255, 205, 90, 255)
+                : bound ? ((accentCol & 0x00FFFFFF) | (140 << 24))
+                : RenderUtils.toImGuiColor(255, 255, 255, 40);
+        dl.addRectFilled(px, py, px + pw, py + ph, fill, 5f, ImDrawFlags.RoundCornersAll);
+        dl.addRect(px, py, px + pw, py + ph, border, 5f, ImDrawFlags.RoundCornersAll, 1f);
+        int textCol = bound || binding ? RenderUtils.toImGuiColor(255, 255, 255, 255) : RenderUtils.toImGuiColor(TEXT_DIM, 1.0f);
+        dl.addText(px + 7f, py + (ph - sz.y) / 2f, textCol, binding ? "..." : text);
+
+        if (leftClick && bindingModule == null) {
+            bindingModule = mod;
+            bindingArmed = false;
+        }
+        if (rightClick && bound) {
+            bindPopupModule = mod;
+            ImGui.openPopup(BIND_POPUP);
+        }
+        if (bindPopupModule == mod) drawBindPopup(accentCol);
+        return hovered;
+    }
+
+    private static void drawBindPopup(int accentCol) {
+        if (bindPopupModule == null) return;
+        Module mod = bindPopupModule;
+
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 9f);
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 5f, 5f);
+        ImGui.pushStyleVar(ImGuiStyleVar.PopupBorderSize, 1f);
+        ImGui.pushStyleColor(ImGuiCol.PopupBg, RenderUtils.toImGuiColor(ROW_BG.getRed(), ROW_BG.getGreen(), ROW_BG.getBlue(), 250));
+        ImGui.pushStyleColor(ImGuiCol.Border, RenderUtils.toImGuiColor(255, 255, 255, 28));
+        boolean open = ImGui.beginPopup(BIND_POPUP);
+        if (open) {
+            float w = 170f;
+            float rowH = 24f;
+            ImDrawList dl = ImGui.getWindowDrawList();
+            float th = ImGui.getFontSize();
+
+            ImVec2 hp = ImGui.getCursorScreenPos();
+            dl.addText(hp.x + 8f, hp.y + 3f, RenderUtils.toImGuiColor(TEXT_DIM, 1.0f), mod.getName() + "  " + InputUtil.getName(mod.getKeyBind()));
+            ImGui.dummy(w, th + 8f);
+
+            String[] labels = {"Unbind", "Toggle (default)", "Only On Hold"};
+            for (int i = 0; i < labels.length; i++) {
+                ImGui.pushID(i);
+                ImVec2 rc = ImGui.getCursorScreenPos();
+                ImGui.invisibleButton("##opt", w, rowH);
+                boolean hov = ImGui.isItemHovered();
+                boolean clicked = ImGui.isItemClicked(0);
+                boolean current = (i == 1 && !mod.isHoldMode()) || (i == 2 && mod.isHoldMode());
+                if (hov) dl.addRectFilled(rc.x, rc.y, rc.x + w, rc.y + rowH, RenderUtils.toImGuiColor(255, 255, 255, 18), 6f, ImDrawFlags.RoundCornersAll);
+                if (current) dl.addRectFilled(rc.x + 2f, rc.y + 5f, rc.x + 5f, rc.y + rowH - 5f, accentCol, 1.5f, ImDrawFlags.RoundCornersAll);
+                int col = i == 0 ? RenderUtils.toImGuiColor(255, 120, 120, 255)
+                        : current ? RenderUtils.toImGuiColor(255, 255, 255, 255) : RenderUtils.toImGuiColor(TEXT, 1.0f);
+                dl.addText(rc.x + 12f, rc.y + (rowH - th) / 2f, col, labels[i]);
+                if (clicked) {
+                    if (i == 0) mod.setKeyBind(0);
+                    else mod.setHoldMode(i == 2);
+                    com.eclipseware.imnotcheatingyouare.client.setting.ConfigManager.save();
+                    ImGui.closeCurrentPopup();
+                }
+                ImGui.popID();
+            }
+            ImGui.endPopup();
+        } else {
+            bindPopupModule = null;
+        }
+        ImGui.popStyleColor(2);
+        ImGui.popStyleVar(3);
+    }
+
     private static void drawModuleRow(Module mod, float rowW, int accentCol) {
         boolean toggled = mod.isToggled();
         boolean isSettings = mod == settingsModule;
@@ -696,10 +808,14 @@ public class ImGuiClickGui {
         ImGui.pushID(mod.getName());
         ImVec2 cursor = ImGui.getCursorScreenPos();
 
-        ImGui.invisibleButton("##row", Math.max(10f, cardW - toggleW - 18f), rowH);
+        float rowBtnW = Math.max(10f, cardW - toggleW - 18f);
+        ImGui.invisibleButton("##row", rowBtnW, rowH);
         boolean hovered = ImGui.isItemHovered();
-        if (bindingModule == null && ImGui.isItemClicked()) mod.toggle();
-        if (hasSettings && ImGui.isItemClicked(1)) {
+        boolean boundKey = mod.getKeyBind() != 0;
+        float pillW = bindPillWidth(mod, hovered);
+        boolean overPill = pillW > 0f && ImGui.isMouseHoveringRect(cursor.x + rowBtnW - pillW - 6f, cursor.y, cursor.x + rowBtnW - 6f, cursor.y + rowH);
+        if (bindingModule == null && ImGui.isItemClicked() && !overPill) mod.toggle();
+        if (hasSettings && ImGui.isItemClicked(1) && !overPill) {
             openSettings(mod, windowX, windowY, windowW);
         }
         if (ImGui.isItemClicked(2)) {
@@ -740,7 +856,7 @@ public class ImGuiClickGui {
 
         float th = ImGui.getFontSize();
         int nameCol = toggled ? accentCol : RenderUtils.toImGuiColor(TEXT, 1.0f);
-        float textLimit = cursor.x + cardW - toggleW - 18f;
+        float textLimit = cursor.x + cardW - toggleW - 18f - (boundKey ? pillW + 8f : 0f);
 
         dl.pushClipRect(cursor.x, cursor.y, textLimit, cursor.y + rowH, true);
         if (binding) {
@@ -755,6 +871,8 @@ public class ImGuiClickGui {
                     RenderUtils.toImGuiColor(TEXT_DIM, 1.0f), subtitle);
         }
         dl.popClipRect();
+
+        drawBindPill(mod, cursor.x + rowBtnW - 6f, cursor.y, rowH, hovered, accentCol);
 
         ImGui.sameLine(cardW - toggleW - 10f);
         ImGui.setCursorPosY(ImGui.getCursorPosY() + (rowH - 16f) / 2f);
@@ -1076,8 +1194,10 @@ public class ImGuiClickGui {
                     ImVec2 c = ImGui.getCursorScreenPos();
                     ImGui.invisibleButton("##vrow", rowW, PANEL_ROW);
                     boolean hovered = ImGui.isItemHovered();
-                    if (bindingModule == null && ImGui.isItemClicked()) mod.toggle();
-                    if (ImGui.isItemClicked(1) && !ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingsByMod(mod).isEmpty()) {
+                    float vPillW = bindPillWidth(mod, hovered);
+                    boolean vOverPill = vPillW > 0f && ImGui.isMouseHoveringRect(c.x + rowW - 22f - vPillW, c.y, c.x + rowW - 22f, c.y + PANEL_ROW);
+                    if (bindingModule == null && ImGui.isItemClicked() && !vOverPill) mod.toggle();
+                    if (ImGui.isItemClicked(1) && !vOverPill && !ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingsByMod(mod).isEmpty()) {
                         openSettings(mod, x, y, PANEL_W);
                     }
                     if (ImGui.isItemClicked(2)) {
@@ -1108,7 +1228,10 @@ public class ImGuiClickGui {
                     int textCol = binding ? RenderUtils.toImGuiColor(255, 205, 90, 255)
                             : mod.isToggled() ? RenderUtils.toImGuiColor(255, 255, 255, 255) : RenderUtils.toImGuiColor(205, 198, 222, 235);
                     String label = binding ? "Press a key (Esc to unbind)" : mod.getName();
+                    ldl.pushClipRect(c.x, c.y, c.x + rowW - 26f - vPillW, c.y + PANEL_ROW, true);
                     ldl.addText(c.x + 11f + hov * 2f, c.y + (PANEL_ROW - th) / 2f, textCol, label);
+                    ldl.popClipRect();
+                    drawBindPill(mod, c.x + rowW - 22f, c.y, PANEL_ROW, hovered, accentCol);
                     if (!ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingsByMod(mod).isEmpty()) {
                         float dx = c.x + rowW - 10f;
                         int dotCol = RenderUtils.toImGuiColor(TEXT_DIM.getRed(), TEXT_DIM.getGreen(), TEXT_DIM.getBlue(), (int) (120 + 100 * hov));

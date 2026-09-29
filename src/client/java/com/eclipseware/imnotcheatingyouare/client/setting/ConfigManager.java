@@ -24,6 +24,7 @@ public class ConfigManager {
             moduleJson.addProperty("Name", m.getName());
             moduleJson.addProperty("Toggled", m.isToggled());
             moduleJson.addProperty("Keybind", m.getKeyBind());
+            moduleJson.addProperty("BindHold", m.isHoldMode());
 
             JsonArray settingsArray = new JsonArray();
             if (ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingsByMod(m) != null) {
@@ -70,6 +71,7 @@ public class ConfigManager {
                         }
                         if (moduleJson.has("Keybind")) {
                             m.setKeyBind(moduleJson.get("Keybind").getAsInt());
+                            if (moduleJson.has("BindHold")) m.setHoldMode(moduleJson.get("BindHold").getAsBoolean());
                         }
                         if (moduleJson.has("Settings")) {
                             JsonArray settingsArray = moduleJson.getAsJsonArray("Settings");
@@ -102,6 +104,7 @@ public class ConfigManager {
             moduleJson.addProperty("Name", m.getName());
             moduleJson.addProperty("Toggled", m.isToggled());
             moduleJson.addProperty("Keybind", m.getKeyBind());
+            moduleJson.addProperty("BindHold", m.isHoldMode());
 
             JsonArray settingsArray = new JsonArray();
             if (ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingsByMod(m) != null) {
@@ -172,6 +175,7 @@ public class ConfigManager {
                         }
                         if (moduleJson.has("Keybind")) {
                             m.setKeyBind(moduleJson.get("Keybind").getAsInt());
+                            if (moduleJson.has("BindHold")) m.setHoldMode(moduleJson.get("BindHold").getAsBoolean());
                         }
                         if (moduleJson.has("Settings")) {
                             JsonArray settingsArray = moduleJson.getAsJsonArray("Settings");
