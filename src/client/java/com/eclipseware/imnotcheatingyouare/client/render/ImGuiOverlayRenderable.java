@@ -63,6 +63,11 @@ public class ImGuiOverlayRenderable implements Renderable {
             blockESP.renderImGuiSelectorWindow();
         }
 
+        SpawnerFinder spawnerFinder = (SpawnerFinder) ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("SpawnerFinder");
+        if (spawnerFinder != null) {
+            spawnerFinder.renderImGuiOverlay();
+        }
+
         WeakDevice weakDevice = (WeakDevice) ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("WeakDevice");
         if (weakDevice != null) {
             weakDevice.renderImGuiOverlay();

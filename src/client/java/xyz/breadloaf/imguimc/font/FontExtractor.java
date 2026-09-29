@@ -50,6 +50,20 @@ public class FontExtractor {
         return null;
     }
 
+    public static byte[] getResourceBytes(String resourcePath) {
+        InputStream in = FontExtractor.class.getResourceAsStream("/" + resourcePath);
+        if (in == null)
+            in = FontExtractor.class.getClassLoader().getResourceAsStream(resourcePath);
+        if (in == null && Thread.currentThread().getContextClassLoader() != null)
+            in = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath);
+        if (in == null) return null;
+        try (InputStream stream = in) {
+            return stream.readAllBytes();
+        } catch (IOException ignored) {
+            return null;
+        }
+    }
+
     public static InputStream getFontStream() {
         InputStream in = FontExtractor.class.getResourceAsStream("/assets/imnotcheatingyouare/font/verdana.ttf");
         if (in == null)
