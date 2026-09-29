@@ -1397,115 +1397,6 @@ public class ImGuiClickGui {
         return result;
     }
 
-    private static final Map<String, Integer> curveDrag = new HashMap<>();
-
-    private static double[] drawCurveEditor(String label, double[] c, double[] def, int accentCol) {
-        ImGui.pushID(label);
-
-        float avail = ImGui.getContentRegionAvailX();
-        float th = ImGui.getFontSize();
-        ImDrawList dl = ImGui.getWindowDrawList();
-        ImVec2 lp = ImGui.getCursorScreenPos();
-
-        dl.addText(lp.x, lp.y, RenderUtils.toImGuiColor(TEXT, 1.0f), label);
-        String resetText = "Reset";
-        ImVec2 rs = new ImVec2();
-        ImGui.calcTextSize(rs, resetText);
-        ImVec2 saved = ImGui.getCursorScreenPos();
-        ImGui.setCursorScreenPos(lp.x + avail - rs.x - 8f, lp.y - 1f);
-        ImGui.invisibleButton("##reset", rs.x + 8f, th + 2f);
-        boolean resetHover = ImGui.isItemHovered();
-        boolean resetClick = ImGui.isItemClicked(0);
-        ImGui.setCursorScreenPos(saved.x, saved.y);
-        dl.addText(lp.x + avail - rs.x - 4f, lp.y, resetHover ? accentCol : RenderUtils.toImGuiColor(TEXT_DIM, 1.0f), resetText);
-        ImGui.dummy(avail, th + 5f);
-
-        float size = Math.min(avail, 170f);
-        float gx = ImGui.getCursorScreenPos().x + (avail - size) / 2f;
-        float gy = ImGui.getCursorScreenPos().y;
-        float pad = 10f;
-        float inner = size - pad * 2f;
-
-        ImGui.setCursorScreenPos(gx, gy);
-        ImGui.invisibleButton("##graph", size, size);
-        boolean active = ImGui.isItemActive();
-        boolean clicked = ImGui.isItemClicked(0);
-
-        double[] out = c.clone();
-
-        float p1x = gx + pad + (float) c[0] * inner, p1y = gy + pad + inner - (float) c[1] * inner;
-        float p2x = gx + pad + (float) c[2] * inner, p2y = gy + pad + inner - (float) c[3] * inner;
-
-        Integer dragging = curveDrag.get(label);
-        if (clicked) {
-            float mx = ImGui.getMousePosX(), my = ImGui.getMousePosY();
-            float d1 = (mx - p1x) * (mx - p1x) + (my - p1y) * (my - p1y);
-            float d2 = (mx - p2x) * (mx - p2x) + (my - p2y) * (my - p2y);
-            dragging = d1 <= d2 ? 0 : 1;
-            curveDrag.put(label, dragging);
-        }
-        if (!active) {
-            curveDrag.remove(label);
-            dragging = null;
-        }
-        if (active && dragging != null) {
-            double nx = clamp((ImGui.getMousePosX() - gx - pad) / inner, 0f, 1f);
-            double ny = clamp(1f - (ImGui.getMousePosY() - gy - pad) / inner, -0.25f, 1.5f);
-            if (dragging == 0) { out[0] = nx; out[1] = ny; }
-            else { out[2] = nx; out[3] = ny; }
-        }
-        if (resetClick) out = def.clone();
-
-        p1x = gx + pad + (float) out[0] * inner; p1y = gy + pad + inner - (float) out[1] * inner;
-        p2x = gx + pad + (float) out[2] * inner; p2y = gy + pad + inner - (float) out[3] * inner;
-
-        dl.addRectFilled(gx, gy, gx + size, gy + size, RenderUtils.toImGuiColor(TOGGLE_OFF.getRed(), TOGGLE_OFF.getGreen(), TOGGLE_OFF.getBlue(), 120), 8f, ImDrawFlags.RoundCornersAll);
-        dl.addRect(gx, gy, gx + size, gy + size, RenderUtils.toImGuiColor(255, 255, 255, 26), 8f, ImDrawFlags.RoundCornersAll, 1f);
-        int grid = RenderUtils.toImGuiColor(255, 255, 255, 14);
-        for (int i = 1; i < 4; i++) {
-            float t = pad + inner * i / 4f;
-            dl.addLine(gx + t, gy + pad, gx + t, gy + pad + inner, grid, 1f);
-            dl.addLine(gx + pad, gy + t, gx + pad + inner, gy + t, grid, 1f);
-        }
-
-        float ox = gx + pad, oy = gy + pad + inner;
-        float ex = gx + pad + inner, ey = gy + pad;
-        int handleLine = RenderUtils.toImGuiColor(255, 255, 255, 60);
-        dl.addLine(ox, oy, p1x, p1y, handleLine, 1f);
-        dl.addLine(ex, ey, p2x, p2y, handleLine, 1f);
-
-        int steps = 40;
-        float prevX = ox, prevY = oy;
-        for (int i = 1; i <= steps; i++) {
-            double t = i / (double) steps;
-            double u = 1.0 - t;
-            double bx = 3 * u * u * t * out[0] + 3 * u * t * t * out[2] + t * t * t;
-            double by = 3 * u * u * t * out[1] + 3 * u * t * t * out[3] + t * t * t;
-            float px = gx + pad + (float) bx * inner;
-            float py = gy + pad + inner - (float) by * inner;
-            dl.addLine(prevX, prevY, px, py, accentCol, 2.2f);
-            prevX = px;
-            prevY = py;
-        }
-
-        int white = RenderUtils.toImGuiColor(255, 255, 255, 255);
-        dl.addCircleFilled(p1x, p1y, 5.5f, white);
-        dl.addCircleFilled(p1x, p1y, 3f, accentCol);
-        dl.addCircleFilled(p2x, p2y, 5.5f, white);
-        dl.addCircleFilled(p2x, p2y, 3f, accentCol);
-
-        dl.addText(gx + 6f, gy + size - th - 3f, RenderUtils.toImGuiColor(TEXT_DIM, 1.0f), "distance");
-        ImVec2 sp = new ImVec2();
-        ImGui.calcTextSize(sp, "speed");
-        dl.addText(gx + size - sp.x - 6f, gy + 3f, RenderUtils.toImGuiColor(TEXT_DIM, 1.0f), "speed");
-
-        ImGui.setCursorScreenPos(gx, gy + size);
-        ImGui.dummy(0f, 0f);
-        ImGui.popID();
-        ImGui.dummy(0f, 9f);
-        return out;
-    }
-
     private static final Map<String, Integer> rangeDrag = new HashMap<>();
 
     private static float[] drawRangeSlider(String label, float lo, float hi, float min, float max, boolean isInt, int accentCol) {
@@ -1800,10 +1691,6 @@ public class ImGuiClickGui {
             float newVal = drawCustomSlider(s.getName(), val, (float) s.getMin(), (float) s.getMax(),
                     s.onlyInt(), accentCol);
             if (newVal != val) s.setValDouble(newVal);
-        } else if (s.isCurve()) {
-            double[] cur = s.getCurve();
-            double[] res = drawCurveEditor(s.getName(), cur, s.getCurveDefault(), accentCol);
-            if (res[0] != cur[0] || res[1] != cur[1] || res[2] != cur[2] || res[3] != cur[3]) s.setCurve(res[0], res[1], res[2], res[3]);
         } else if (s.isRange()) {
             float[] r = drawRangeSlider(s.getName(), (float) s.getRangeLow(), (float) s.getRangeHigh(),
                     (float) s.getMin(), (float) s.getMax(), s.onlyInt(), accentCol);
