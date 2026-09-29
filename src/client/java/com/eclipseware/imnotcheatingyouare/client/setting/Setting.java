@@ -40,6 +40,22 @@ public class Setting {
     }
     
     private double dval2;
+    private double[] curve = {0.25, 0.1, 0.25, 1.0};
+    private double[] curveDefault = {0.25, 0.1, 0.25, 1.0};
+
+    public Setting(String name, Module parent, double x1, double y1, double x2, double y2) {
+        this.name = name; this.parent = parent; this.mode = "Curve";
+        this.curve = new double[]{x1, y1, x2, y2};
+        this.curveDefault = new double[]{x1, y1, x2, y2};
+    }
+
+    public boolean isCurve() { return this.mode.equalsIgnoreCase("Curve"); }
+    public double[] getCurve() { return this.curve; }
+    public double[] getCurveDefault() { return this.curveDefault; }
+    public void setCurve(double x1, double y1, double x2, double y2) {
+        this.curve = new double[]{Math.max(0.0, Math.min(1.0, x1)), Math.max(-0.25, Math.min(1.5, y1)),
+                Math.max(0.0, Math.min(1.0, x2)), Math.max(-0.25, Math.min(1.5, y2))};
+    }
     public Setting(String name, Module parent, double lo, double hi, double min, double max, boolean onlyint) {
         this.name = name; this.parent = parent; this.min = min; this.max = max; this.onlyint = onlyint; this.mode = "Range";
         double a = clamp(lo), b = clamp(hi);

@@ -16,7 +16,57 @@ public final class MouseAimHelper {
     private static double accumulatorX;
     private static double accumulatorY;
 
+    public interface FrameSource {
+        boolean active();
+        void step(double dtSeconds, double[] outDegrees);
+    }
+
+    private static volatile FrameSource frameSource;
+    private static long lastFrameNanos;
+    private static double framePitchPending;
+    private static double frameAccX;
+    private static double frameAccY;
+    private static final double[] frameOut = new double[2];
+
     private MouseAimHelper() {}
+
+    public static void setFrameSource(FrameSource source) {
+        frameSource = source;
+        lastFrameNanos = 0L;
+        frameAccX = 0.0D;
+        frameAccY = 0.0D;
+        framePitchPending = 0.0D;
+    }
+
+    private static double stepFrameSource() {
+        FrameSource src = frameSource;
+        long now = System.nanoTime();
+        double dt = lastFrameNanos == 0L ? 0.0D : Math.min((now - lastFrameNanos) / 1_000_000_000.0D, 0.1D);
+        lastFrameNanos = now;
+
+        framePitchPending = 0.0D;
+        if (src == null || !src.active()) {
+            frameAccX = 0.0D;
+            frameAccY = 0.0D;
+            return 0.0D;
+        }
+
+        frameOut[0] = 0.0D;
+        frameOut[1] = 0.0D;
+        src.step(dt, frameOut);
+
+        float sens = getSensitivityMultiplier();
+        frameAccX += frameOut[0];
+        frameAccY += frameOut[1];
+
+        long px = Math.round(frameAccX / sens);
+        frameAccX -= px * (double) sens;
+        long py = Math.round(frameAccY / sens);
+        frameAccY -= py * (double) sens;
+
+        framePitchPending = py;
+        return px;
+    }
 
     public static void addDelta(double dx, double dy) {
         manualDeltaX += dx;
@@ -45,7 +95,7 @@ public final class MouseAimHelper {
     }
 
     public static double pollDX() {
-        double currentDelta = manualDeltaX;
+        double currentDelta = manualDeltaX + stepFrameSource();
         manualDeltaX = 0.0D;
         
         long currentTime = System.currentTimeMillis();
@@ -67,7 +117,8 @@ public final class MouseAimHelper {
     }
 
     public static double pollDY() {
-        double currentDelta = manualDeltaY;
+        double currentDelta = manualDeltaY + framePitchPending;
+        framePitchPending = 0.0D;
         manualDeltaY = 0.0D;
         
         long currentTime = System.currentTimeMillis();
