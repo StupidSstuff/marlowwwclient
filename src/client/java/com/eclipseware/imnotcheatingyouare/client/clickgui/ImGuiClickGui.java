@@ -874,10 +874,10 @@ public class ImGuiClickGui {
 
         drawBindPill(mod, cursor.x + rowBtnW - 6f, cursor.y, rowH, hovered, accentCol);
 
-        ImGui.sameLine(cardW - toggleW - 10f);
-        ImGui.setCursorPosY(ImGui.getCursorPosY() + (rowH - 16f) / 2f);
+        ImGui.setCursorScreenPos(cursor.x + cardW - toggleW - 10f, cursor.y + (rowH - 16f) / 2f);
         boolean newToggled = drawToggleSwitch("##toggle", mod.getName(), toggled, accentCol);
         if (newToggled != toggled) mod.toggle();
+        ImGui.setCursorScreenPos(cursor.x, cursor.y + rowH);
 
         ImGui.popID();
         ImGui.dummy(0f, 3f);
