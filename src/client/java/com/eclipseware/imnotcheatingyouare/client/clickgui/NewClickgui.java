@@ -6,7 +6,7 @@ import com.eclipseware.imnotcheatingyouare.client.module.Module;
 import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
 import com.eclipseware.imnotcheatingyouare.client.ui.*;
 import com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -662,8 +662,8 @@ public class NewClickgui extends Screen {
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        super.extractBackground(context, mouseX, mouseY, delta);
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        super.renderBackground(context, mouseX, mouseY, delta);
         context.fill(0, 0, this.width, this.height, 0x88000000);
     }
 
@@ -673,7 +673,7 @@ public class NewClickgui extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         GlassyTheme.updateColors(RenderUtils.getThemeAccentColor().getRGB());
         
         long now = System.currentTimeMillis();
@@ -694,7 +694,7 @@ public class NewClickgui extends Screen {
         context.pose().pushMatrix();
         context.pose().scale(scale, scale);
         
-        GuiGraphics graphics = new GuiGraphics(context);
+        GuiGraphics graphics = context;
         
         int panelWidth = PANEL_WIDTH;
         int panelHeight = PANEL_HEIGHT;
@@ -768,7 +768,7 @@ public class NewClickgui extends Screen {
             }
 
             renderMacroUI(graphics, scaledMouseX, scaledMouseY, timeDelta, startX, startY);
-            super.extractRenderState(context, scaledMouseX, scaledMouseY, delta);
+            super.render(context, scaledMouseX, scaledMouseY, delta);
             context.pose().popMatrix();
             return;
         } else if (selectedCategory == Category.Filters) {
@@ -782,7 +782,7 @@ public class NewClickgui extends Screen {
             }
 
             renderFiltersUI(graphics, scaledMouseX, scaledMouseY, timeDelta, startX, startY);
-            super.extractRenderState(context, scaledMouseX, scaledMouseY, delta);
+            super.render(context, scaledMouseX, scaledMouseY, delta);
             context.pose().popMatrix();
             return;
         } else {
@@ -843,7 +843,7 @@ public class NewClickgui extends Screen {
             targetScrollOffset = 0;
         }
 
-        graphics.extractor().enableScissor(listX, listY, listX + listWidth, listY + listHeight);
+        graphics.enableScissor(listX, listY, listX + listWidth, listY + listHeight);
 
         int modY = listY - (int) scrollOffset;
         
@@ -957,9 +957,9 @@ public class NewClickgui extends Screen {
         filterPlayerBox.visible = false;
         filterEntityBox.visible = false;
 
-        super.extractRenderState(context, scaledMouseX, scaledMouseY, delta);
+        super.render(context, scaledMouseX, scaledMouseY, delta);
 
-        graphics.extractor().disableScissor();
+        graphics.disableScissor();
 
         searchBox.visible = oldSearchVisible;
         macroNameBox.visible = oldMacroVisible;
@@ -971,13 +971,13 @@ public class NewClickgui extends Screen {
 
         for (GlassyButton btn : categoryButtons) {
             if (btn.visible) {
-                btn.extractRenderState(context, scaledMouseX, scaledMouseY, delta);
+                btn.render(context, scaledMouseX, scaledMouseY, delta);
             }
         }
-        if (searchBox.visible) searchBox.extractRenderState(context, scaledMouseX, scaledMouseY, delta);
-        if (macroNameBox.visible) macroNameBox.extractRenderState(context, scaledMouseX, scaledMouseY, delta);
-        if (filterPlayerBox.visible) filterPlayerBox.extractRenderState(context, scaledMouseX, scaledMouseY, delta);
-        if (filterEntityBox.visible) filterEntityBox.extractRenderState(context, scaledMouseX, scaledMouseY, delta);
+        if (searchBox.visible) searchBox.render(context, scaledMouseX, scaledMouseY, delta);
+        if (macroNameBox.visible) macroNameBox.render(context, scaledMouseX, scaledMouseY, delta);
+        if (filterPlayerBox.visible) filterPlayerBox.render(context, scaledMouseX, scaledMouseY, delta);
+        if (filterEntityBox.visible) filterEntityBox.render(context, scaledMouseX, scaledMouseY, delta);
 
         graphics.fill(startX + 130, startY + panelHeight - 40, startX + panelWidth, startY + panelHeight - 39, 0x44FFFFFF);
         
@@ -1084,9 +1084,9 @@ public class NewClickgui extends Screen {
         List<com.eclipseware.imnotcheatingyouare.client.macro.Macro> macros = com.eclipseware.imnotcheatingyouare.client.macro.MacroManager.getMacros();
         com.eclipseware.imnotcheatingyouare.client.macro.Macro active = com.eclipseware.imnotcheatingyouare.client.macro.MacroManager.getActiveMacro();
         
-        graphics.extractor().enableScissor(listX + 2, listAreaY + 2, listX + listW - 2, listAreaY + listAreaH - 2);
-        graphics.extractor().pose().pushMatrix();
-        graphics.extractor().pose().translate(0f, -macroListScroll);
+        graphics.enableScissor(listX + 2, listAreaY + 2, listX + listW - 2, listAreaY + listAreaH - 2);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(0f, -macroListScroll);
         
         int r = 155, g = 60, b = 255;
         Module theme = ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("Theme");
@@ -1115,8 +1115,8 @@ public class NewClickgui extends Screen {
             graphics.drawString(this.font, Component.literal("X"), listX + listW - 18, itemY + 8, delHovered ? 0xFFFF5555 : 0xFF8F8F8F, false);
         }
         
-        graphics.extractor().pose().popMatrix();
-        graphics.extractor().disableScissor();
+        graphics.pose().popMatrix();
+        graphics.disableScissor();
         
         int totalLeftHeight = macros.size() * 32 + 10;
         if (totalLeftHeight > listAreaH) {
@@ -1191,9 +1191,9 @@ public class NewClickgui extends Screen {
         
         List<com.eclipseware.imnotcheatingyouare.client.macro.MacroAction> actions = active.getActions();
         
-        graphics.extractor().enableScissor(editX + 2, actionAreaY + 2, editX + actionAreaW - 2, actionAreaY + actionAreaH - 2);
-        graphics.extractor().pose().pushMatrix();
-        graphics.extractor().pose().translate(0f, -actionListScroll);
+        graphics.enableScissor(editX + 2, actionAreaY + 2, editX + actionAreaW - 2, actionAreaY + actionAreaH - 2);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(0f, -actionListScroll);
         
         for (int idx = 0; idx < actions.size(); idx++) {
             com.eclipseware.imnotcheatingyouare.client.macro.MacroAction action = actions.get(idx);
@@ -1226,8 +1226,8 @@ public class NewClickgui extends Screen {
             graphics.drawString(this.font, Component.literal(label), editX + 10, rowY, color, false);
         }
         
-        graphics.extractor().pose().popMatrix();
-        graphics.extractor().disableScissor();
+        graphics.pose().popMatrix();
+        graphics.disableScissor();
         
         int totalRightHeight = actions.size() * 15 + 10;
         if (totalRightHeight > actionAreaH) {
@@ -1293,9 +1293,9 @@ public class NewClickgui extends Screen {
         List<String> players = new ArrayList<>(com.eclipseware.imnotcheatingyouare.client.utils.TargetFilterManager.getFilteredPlayers());
         players.sort(String.CASE_INSENSITIVE_ORDER);
 
-        graphics.extractor().enableScissor(leftX + 2, leftY + 2, leftX + leftW - 2, leftY + leftH - 2);
-        graphics.extractor().pose().pushMatrix();
-        graphics.extractor().pose().translate(0f, -playerListScroll);
+        graphics.enableScissor(leftX + 2, leftY + 2, leftX + leftW - 2, leftY + leftH - 2);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(0f, -playerListScroll);
 
         for (int i = 0; i < players.size(); i++) {
             String name = players.get(i);
@@ -1311,8 +1311,8 @@ public class NewClickgui extends Screen {
             graphics.drawString(this.font, Component.literal("X"), leftX + leftW - 18, itemY + 4, delHovered ? 0xFFFF5555 : 0xFF8F8F8F, false);
         }
 
-        graphics.extractor().pose().popMatrix();
-        graphics.extractor().disableScissor();
+        graphics.pose().popMatrix();
+        graphics.disableScissor();
 
         int totalLeftHeight = players.size() * 22 + 10;
         if (totalLeftHeight > leftH) {
@@ -1347,9 +1347,9 @@ public class NewClickgui extends Screen {
         }
         sortedEntities.sort((t1, t2) -> t1.getDescription().getString().compareToIgnoreCase(t2.getDescription().getString()));
 
-        graphics.extractor().enableScissor(rightX + 2, rightY + 2, rightX + rightW - 2, rightY + rightH - 2);
-        graphics.extractor().pose().pushMatrix();
-        graphics.extractor().pose().translate(0f, -entityListScroll);
+        graphics.enableScissor(rightX + 2, rightY + 2, rightX + rightW - 2, rightY + rightH - 2);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(0f, -entityListScroll);
 
         for (int i = 0; i < sortedEntities.size(); i++) {
             net.minecraft.world.entity.EntityType<?> type = sortedEntities.get(i);
@@ -1374,8 +1374,8 @@ public class NewClickgui extends Screen {
             }
         }
 
-        graphics.extractor().pose().popMatrix();
-        graphics.extractor().disableScissor();
+        graphics.pose().popMatrix();
+        graphics.disableScissor();
 
         int totalRightHeight = sortedEntities.size() * 22 + 10;
         if (totalRightHeight > rightH) {

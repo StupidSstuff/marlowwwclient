@@ -3,8 +3,8 @@ package com.eclipseware.imnotcheatingyouare.client.render;
 import com.eclipseware.imnotcheatingyouare.client.module.impl.SelfShader;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.renderpearl.api.GpuFormat;
-import com.mojang.renderpearl.backend.opengl.GlTexture;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.opengl.GlTexture;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -104,18 +104,28 @@ public final class HandShaderRenderer {
         return !failed && program != 0;
     }
 
-    public static RenderTarget captureTarget(RenderTarget main) {
+    public static void beginCapture(RenderTarget main) {
         if (target == null) {
-            target = new TextureTarget("Marlow Hand Shader", main.width, main.height, GpuFormat.RGBA8_UNORM, null);
+            target = new TextureTarget("Marlow Hand Shader", main.width, main.height, true);
         } else if (target.width != main.width || target.height != main.height) {
             target.resize(main.width, main.height);
         }
+        RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(target.getColorTexture(), 0, target.getDepthTexture(), 1.0);
+        RenderSystem.outputColorTextureOverride = target.getColorTextureView();
+        RenderSystem.outputDepthTextureOverride = target.getDepthTextureView();
         capturing = true;
-        return target;
+    }
+
+    public static void abortCapture() {
+        RenderSystem.outputColorTextureOverride = null;
+        RenderSystem.outputDepthTextureOverride = null;
+        capturing = false;
     }
 
     public static void composite(RenderTarget main) {
         if (!capturing) return;
+        RenderSystem.outputColorTextureOverride = null;
+        RenderSystem.outputDepthTextureOverride = null;
         capturing = false;
         if (target == null) return;
         if (!(target.getColorTexture() instanceof GlTexture hand) || !(main.getColorTexture() instanceof GlTexture dest)) return;

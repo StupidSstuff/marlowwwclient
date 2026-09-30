@@ -16,12 +16,11 @@ public class ConfigManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     /**
-     * Bumped when the on-disk "Keybind" encoding changes. Minecraft 26.3 switched from GLFW to
-     * SDL keycodes, so a config saved by an older build stores keybinds in the old GLFW numbering
-     * (e.g. 344 for Right Shift) - those numbers don't correspond to anything meaningful under the
-     * new SDL-based encoding and must not be applied as-is, or the bind will silently never fire.
+     * Identifies the on-disk "Keybind" encoding. Version 1 is GLFW key codes, which is what
+     * Minecraft 1.21.11 uses. Configs written by the Minecraft 26.3 build are version 2 (SDL
+     * scancodes) and their keybinds must not be applied as-is, or the bind will silently never fire.
      */
-    private static final int CONFIG_VERSION = 2;
+    private static final int CONFIG_VERSION = 1;
 
     public static String exportSpecific(java.util.List<Module> modulesToInclude) {
         JsonObject json = new JsonObject();
@@ -67,7 +66,7 @@ public class ConfigManager {
             if (rawJson == null) return;
             JsonObject json = JsonParser.parseString(rawJson).getAsJsonObject();
             int savedVersion = json.has("ConfigVersion") ? json.get("ConfigVersion").getAsInt() : 1;
-            boolean keybindsAreCurrent = savedVersion >= CONFIG_VERSION;
+            boolean keybindsAreCurrent = savedVersion == CONFIG_VERSION;
             if (json.has("Modules")) {
                 JsonArray modulesArray = json.getAsJsonArray("Modules");
                 for (JsonElement elem : modulesArray) {
@@ -173,9 +172,9 @@ public class ConfigManager {
 
             JsonObject json = JsonParser.parseString(rawJson).getAsJsonObject();
             int savedVersion = json.has("ConfigVersion") ? json.get("ConfigVersion").getAsInt() : 1;
-            boolean keybindsAreCurrent = savedVersion >= CONFIG_VERSION;
+            boolean keybindsAreCurrent = savedVersion == CONFIG_VERSION;
             if (!keybindsAreCurrent) {
-                System.out.println("[EclipseWare] Config predates the SDL keybind migration; ignoring saved keybinds and keeping defaults.");
+                System.out.println("[EclipseWare] Config was saved with a different keybind encoding; ignoring saved keybinds and keeping defaults.");
             }
 
             if (json.has("Modules")) {

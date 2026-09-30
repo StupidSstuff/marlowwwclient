@@ -19,7 +19,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -127,7 +126,7 @@ public class CrystalAura extends Module {
     @Override
     public void onTick() {
         if (mc.player == null || mc.level == null || mc.gameMode == null) return;
-        if (mc.gui.screen() != null || mc.player.isDeadOrDying()) return;
+        if (mc.screen != null || mc.player.isDeadOrDying()) return;
         if (pauseOnEat.getValBoolean() && mc.player.isUsingItem()) return;
         if (requireHeld.getValBoolean() && !holdingCrystal()) return;
 
@@ -265,7 +264,7 @@ public class CrystalAura extends Module {
             swapped = true;
         }
         InteractionResult result = mc.gameMode.useItemOn(mc.player, hand, hit);
-        if (result.consumesAction()) mc.player.swing(hand, SwingAnimation.DEFAULT, true);
+        if (result.consumesAction()) mc.player.swing(hand);
         if (swapped && swapMode.getValString().equals("Silent")) ModuleUtils.switchToSlot(original);
         return result.consumesAction();
     }

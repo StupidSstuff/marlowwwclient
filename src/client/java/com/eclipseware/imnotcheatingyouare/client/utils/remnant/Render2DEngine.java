@@ -1,9 +1,9 @@
 package com.eclipseware.imnotcheatingyouare.client.utils.remnant;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
 public class Render2DEngine {
-    public static GuiGraphicsExtractor activeContext;
+    public static GuiGraphics activeContext;
 
     private static final net.minecraft.resources.Identifier DYNAMIC_TEXTURE_ID = net.minecraft.resources.Identifier.parse("imnotcheatingyouare:rounded_corner_atlas");
     private static boolean textureRegistered = false;

@@ -161,7 +161,7 @@ public class Anchor extends Module {
 
     @Override
     public void onTick() {
-        if (mc.player == null || mc.level == null || mc.gui.screen() != null || mc.gameMode == null) return;
+        if (mc.player == null || mc.level == null || mc.screen != null || mc.gameMode == null) return;
 
         if (pauseCounter > 0) {
             pauseCounter--;
@@ -484,18 +484,11 @@ public class Anchor extends Module {
         String bindSave;
         if (InputUtil.isMouseBind(activateCode)) {
             int ordinal = -activateCode - 1;
-            int sdl = switch (ordinal) {
-                case 0 -> 1;
-                case 1 -> 3;
-                case 2 -> 2;
-                case 3 -> 4;
-                case 4 -> 5;
-                default -> -1;
-            };
-            if (sdl < 0) return false;
-            bindSave = InputConstants.Type.MOUSE.getOrCreate(sdl).getName();
+            int glfwButton = (ordinal >= 0 && ordinal <= 4) ? ordinal : -1;
+            if (glfwButton < 0) return false;
+            bindSave = InputConstants.Type.MOUSE.getOrCreate(glfwButton).getName();
         } else {
-            bindSave = InputConstants.Type.KEYBOARD.getOrCreate(activateCode).getName();
+            bindSave = InputConstants.Type.KEYSYM.getOrCreate(activateCode).getName();
         }
         try {
             return mc.options.keyUse.saveString().equals(bindSave);
@@ -532,7 +525,7 @@ public class Anchor extends Module {
         if (fireBreakTicks > 8) fireBreakTicks = 0;
         if (fireBreakTicks == 0) {
             mc.gameMode.startDestroyBlock(pos, Direction.UP);
-            mc.player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+            mc.player.swing(InteractionHand.MAIN_HAND);
         } else {
             mc.gameMode.continueDestroyBlock(pos, Direction.UP);
         }

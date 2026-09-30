@@ -43,7 +43,7 @@ public class DetectionAlert extends Module {
             previouslyEnabled.clear();
         }
 
-        if (fetched && currentServer != null && mc.gui.screen() == null) {
+        if (fetched && currentServer != null && mc.screen == null) {
             List<Module> currentlyEnabled = new ArrayList<>();
             for (Module m : ImnotcheatingyouareClient.INSTANCE.moduleManager.modules) {
                 if (m.isToggled()) currentlyEnabled.add(m);
@@ -83,8 +83,8 @@ public class DetectionAlert extends Module {
             mc.execute(() -> {
                 if (rules == null) {
                     if (mc.player != null) {
-                        mc.player.sendSystemMessage(
-                            Component.literal("\u00a7cYour client is disconnected from the database and does not have the latest detections or bypasses from the database!")
+                        mc.player.displayClientMessage(
+                            Component.literal("\u00a7cYour client is disconnected from the database and does not have the latest detections or bypasses from the database!"), false
                         );
                     }
                 } else {

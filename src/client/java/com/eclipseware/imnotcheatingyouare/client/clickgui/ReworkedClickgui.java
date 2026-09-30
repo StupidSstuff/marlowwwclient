@@ -4,9 +4,9 @@ import com.eclipseware.imnotcheatingyouare.client.ImnotcheatingyouareClient;
 import com.eclipseware.imnotcheatingyouare.client.module.Category;
 import com.eclipseware.imnotcheatingyouare.client.module.Module;
 import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
-import com.eclipseware.imnotcheatingyouare.client.ui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphics;
 import com.eclipseware.imnotcheatingyouare.client.ui.reworked.*;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -329,8 +329,8 @@ public class ReworkedClickgui extends Screen {
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        super.extractBackground(context, mouseX, mouseY, delta);
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        super.renderBackground(context, mouseX, mouseY, delta);
         context.fill(0, 0, this.width, this.height, 0x88000000);
     }
 
@@ -340,7 +340,7 @@ public class ReworkedClickgui extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         ReworkedTheme.refresh();
 
         long now = System.currentTimeMillis();
@@ -373,7 +373,7 @@ public class ReworkedClickgui extends Screen {
         context.pose().pushMatrix();
         context.pose().scale(scale, scale);
 
-        GuiGraphics g = new GuiGraphics(context);
+        GuiGraphics g = context;
 
         int panelWidth = PANEL_WIDTH;
         int panelHeight = PANEL_HEIGHT;
@@ -495,7 +495,7 @@ public class ReworkedClickgui extends Screen {
         }
         if (totalHeight <= listHeight) targetScrollOffset = 0;
 
-        g.extractor().enableScissor(listX, listY, listX + listWidth, listY + listHeight);
+        g.enableScissor(listX, listY, listX + listWidth, listY + listHeight);
 
         int modY = listY - (int) scrollOffset;
         int rowR = Math.min(ReworkedTheme.radius, Math.min(listWidth - 4, rowHeight - 4) / 2);
@@ -604,9 +604,9 @@ public class ReworkedClickgui extends Screen {
         for (RoundedButton b : categoryButtons) { oldCatVis.add(b.visible); b.visible = false; }
         if (searchBox != null) searchBox.visible = false;
 
-        super.extractRenderState(context, scaledMouseX, scaledMouseY, delta);
+        super.render(context, scaledMouseX, scaledMouseY, delta);
 
-        g.extractor().disableScissor();
+        g.disableScissor();
 
         if (searchBox != null) {
             searchBox.visible = oldSearchVisible;
@@ -614,13 +614,13 @@ public class ReworkedClickgui extends Screen {
                 searchBox.setX(panelX + 150);
                 searchBox.setY(panelY + scaledPanelH - 30);
                 searchBox.setWidth(scaledPanelW - 160);
-                searchBox.extractRenderState(context, scaledMouseX, scaledMouseY, delta);
+                searchBox.render(context, scaledMouseX, scaledMouseY, delta);
             }
         }
         for (int i = 0; i < categoryButtons.size(); i++) {
             RoundedButton b = categoryButtons.get(i);
             b.visible = oldCatVis.get(i);
-            if (b.visible) b.extractRenderState(context, scaledMouseX, scaledMouseY, delta);
+            if (b.visible) b.render(context, scaledMouseX, scaledMouseY, delta);
         }
 
         context.fill(panelX + 140, panelY + scaledPanelH - 40, panelX + scaledPanelW, panelY + scaledPanelH - 39, 0x33FFFFFF);

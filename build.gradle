@@ -1,5 +1,5 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom-remap' version '1.15.5'
     id 'maven-publish'
 }
 
@@ -17,6 +17,11 @@ tasks.matching { it.name == "jar" || it.name == "remapJar" || it.name == "remapC
 loom {
     splitEnvironmentSourceSets()
 
+    mixin {
+        useLegacyMixinAp = true
+        defaultRefmapName = "imnotcheatingyouare-refmap.json"
+    }
+
     mods {
         "imnotcheatingyouare" {
             sourceSet sourceSets.main
@@ -26,6 +31,7 @@ loom {
 
     runs {
         client {
+            runDir "run-1.21.11"
             vmArg "--enable-native-access=ALL-UNNAMED"
             vmArg "-Doshi.os.windows.perfos.disabled=true"
             vmArg "-Doshi.os.windows.perfproc.disabled=true"
@@ -58,22 +64,23 @@ repositories {
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()
     
-    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // LWJGL NanoVG
-    implementation("org.lwjgl:lwjgl-nanovg:3.4.1") {
+    implementation("org.lwjgl:lwjgl-nanovg:3.3.3") {
         exclude group: "org.lwjgl"
     }
-    runtimeOnly("org.lwjgl:lwjgl-nanovg:3.4.1:natives-windows") {
+    runtimeOnly("org.lwjgl:lwjgl-nanovg:3.3.3:natives-windows") {
         exclude group: "org.lwjgl"
     }
-    runtimeOnly("org.lwjgl:lwjgl-nanovg:3.4.1:natives-linux") {
+    runtimeOnly("org.lwjgl:lwjgl-nanovg:3.3.3:natives-linux") {
         exclude group: "org.lwjgl"
     }
-    runtimeOnly("org.lwjgl:lwjgl-nanovg:3.4.1:natives-macos") {
+    runtimeOnly("org.lwjgl:lwjgl-nanovg:3.3.3:natives-macos") {
         exclude group: "org.lwjgl"
     }
 

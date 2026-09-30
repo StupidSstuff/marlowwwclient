@@ -31,7 +31,7 @@ public class Menu extends Module {
 
         boolean isPressed = com.eclipseware.imnotcheatingyouare.client.utils.InputUtil.isDown(this.getKeyBind());
 
-        if (mc.gui.screen() != null) {
+        if (mc.screen != null) {
             wasPressed = isPressed;
             return;
         }
@@ -69,7 +69,7 @@ public class Menu extends Module {
             if (ImnotcheatingyouareClient.INSTANCE.clickGui == null) {
                 ImnotcheatingyouareClient.INSTANCE.clickGui = new Clickgui();
             }
-            if (!(mc.gui.screen() instanceof Clickgui)) {
+            if (!(mc.screen instanceof Clickgui)) {
                 mc.setScreenAndShow(ImnotcheatingyouareClient.INSTANCE.clickGui);
             }
         } else {

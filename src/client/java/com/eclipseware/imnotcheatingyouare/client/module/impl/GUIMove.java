@@ -17,7 +17,7 @@ public class GUIMove extends Module {
     public void onTick() {
         if (mc.player == null) return;
         if (com.eclipseware.imnotcheatingyouare.client.module.impl.AutoTotem.shouldPauseInputs()) return;
-        if (mc.gui.screen() != null && !(mc.gui.screen() instanceof ChatScreen) && !(mc.gui.screen() instanceof SignEditScreen) && !(mc.gui.screen() instanceof AnvilScreen)) {
+        if (mc.screen != null && !(mc.screen instanceof ChatScreen) && !(mc.screen instanceof SignEditScreen) && !(mc.screen instanceof AnvilScreen)) {
             mc.options.keyUp.setDown(InputUtil.isDown(getKeyCode(mc.options.keyUp)));
             mc.options.keyDown.setDown(InputUtil.isDown(getKeyCode(mc.options.keyDown)));
             mc.options.keyLeft.setDown(InputUtil.isDown(getKeyCode(mc.options.keyLeft)));
@@ -31,16 +31,6 @@ public class GUIMove extends Module {
     }
 
     private int getKeyCode(KeyMapping mapping) {
-        try {
-            for (java.lang.reflect.Method m : mapping.getClass().getMethods()) {
-                if (m.getParameterCount() == 0 && m.getReturnType().getName().contains("InputConstants$Key")) {
-                    Object keyObj = m.invoke(mapping);
-                    java.lang.reflect.Method getValue = keyObj.getClass().getMethod("getValue");
-                    return (int) getValue.invoke(keyObj);
-                }
-            }
-        } catch (Exception ignored) {
-        }
         return mapping.getDefaultKey().getValue();
     }
 }

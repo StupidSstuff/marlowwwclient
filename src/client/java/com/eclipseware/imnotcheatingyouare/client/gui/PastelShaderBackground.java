@@ -98,10 +98,11 @@ public final class PastelShaderBackground {
         if (texture != null && now - lastRenderNanos < 4_000_000L) return true;
         lastRenderNanos = now;
         Minecraft mc = Minecraft.getInstance();
-        var size = mc.getWindow().queryFramebufferSize();
-        if (size.width() < 64 || size.height() < 64) return texture != null;
-        int width = Math.max(1, size.width() / 2);
-        int height = Math.max(1, size.height() / 2);
+        int fbWidth = mc.getWindow().getWidth();
+        int fbHeight = mc.getWindow().getHeight();
+        if (fbWidth < 64 || fbHeight < 64) return texture != null;
+        int width = Math.max(1, fbWidth / 2);
+        int height = Math.max(1, fbHeight / 2);
 
         try {
             if (program == 0 && !createProgram()) {
@@ -114,10 +115,10 @@ public final class PastelShaderBackground {
                 mc.getTextureManager().register(TEXTURE_ID, texture);
                 textureWidth = width;
                 textureHeight = height;
-                if (texture.getTexture() instanceof com.mojang.renderpearl.backend.opengl.GlTexture created)
+                if (texture.getTexture() instanceof com.mojang.blaze3d.opengl.GlTexture created)
                     com.eclipseware.imnotcheatingyouare.client.utils.ImGuiTextures.invalidate(created.glId());
             }
-            if (!(texture.getTexture() instanceof com.mojang.renderpearl.backend.opengl.GlTexture glTexture)) {
+            if (!(texture.getTexture() instanceof com.mojang.blaze3d.opengl.GlTexture glTexture)) {
                 failed = true;
                 return false;
             }
@@ -131,7 +132,7 @@ public final class PastelShaderBackground {
 
     public static int glTextureId() {
         if (failed || texture == null) return 0;
-        if (texture.getTexture() instanceof com.mojang.renderpearl.backend.opengl.GlTexture glTexture)
+        if (texture.getTexture() instanceof com.mojang.blaze3d.opengl.GlTexture glTexture)
             return com.eclipseware.imnotcheatingyouare.client.utils.ImGuiTextures.prepare(glTexture.glId(), true);
         return 0;
     }

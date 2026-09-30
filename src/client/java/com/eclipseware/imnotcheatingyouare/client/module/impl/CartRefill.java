@@ -5,7 +5,7 @@ import com.eclipseware.imnotcheatingyouare.client.module.Category;
 import com.eclipseware.imnotcheatingyouare.client.module.Module;
 import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import java.util.ArrayList;
@@ -105,7 +105,7 @@ public class CartRefill extends Module {
                 break;
 
             case 1:
-                if (getBool("Auto Open") && !(mc.gui.screen() instanceof InventoryScreen)) {
+                if (getBool("Auto Open") && !(mc.screen instanceof InventoryScreen)) {
                     mc.setScreenAndShow(new InventoryScreen(mc.player));
                 }
                 stage = 2;
@@ -124,11 +124,11 @@ public class CartRefill extends Module {
                 int inventoryCartSlot = findCartInMainInventory();
 
                 if (inventoryCartSlot != -1) {
-                    mc.gameMode.handleContainerInput(
+                    mc.gameMode.handleInventoryMouseClick(
                         mc.player.inventoryMenu.containerId,
                         inventoryCartSlot,
                         hotbarSlotIndex,
-                        ContainerInput.SWAP,
+                        ClickType.SWAP,
                         mc.player
                     );
                     lastActionTime = System.currentTimeMillis();
@@ -139,7 +139,7 @@ public class CartRefill extends Module {
                 break;
 
             case 3:
-                if (getBool("Auto Close") && mc.gui.screen() instanceof InventoryScreen) {
+                if (getBool("Auto Close") && mc.screen instanceof InventoryScreen) {
                     mc.player.closeContainer();
                 }
                 stage = 4;

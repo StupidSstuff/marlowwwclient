@@ -4,7 +4,7 @@ import com.eclipseware.imnotcheatingyouare.client.ImnotcheatingyouareClient;
 import com.eclipseware.imnotcheatingyouare.client.module.Category;
 import com.eclipseware.imnotcheatingyouare.client.module.Module;
 import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
-import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.Items;
 
 public class AutoTotem extends Module {
@@ -67,11 +67,11 @@ public class AutoTotem extends Module {
             triggerInputPause();
         }
 
-        mc.gameMode.handleContainerInput(
+        mc.gameMode.handleInventoryMouseClick(
                 0,
                 totemSlot,
                 40,
-                ContainerInput.SWAP,
+                ClickType.SWAP,
                 mc.player
         );
         lastSwapTime = System.currentTimeMillis();

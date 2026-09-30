@@ -3,7 +3,7 @@ package com.eclipseware.imnotcheatingyouare.client.clickgui.components;
 import com.eclipseware.imnotcheatingyouare.client.clickgui.Clickgui;
 import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
 import com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
 public class BooleanButton extends Button {
     private final Setting setting;
@@ -15,7 +15,7 @@ public class BooleanButton extends Button {
     }
 
     @Override
-    public void drawScreen(GuiGraphicsExtractor context, int mouseX, int mouseY, float partialTicks) {
+    public void drawScreen(GuiGraphics context, int mouseX, int mouseY, float partialTicks) {
         java.awt.Color theme = RenderUtils.getThemeAccentColor();
         int accent = (theme.getRGB() & 0x00FFFFFF) | (120 << 24);
         int dark = 0x22000000;

@@ -24,7 +24,7 @@ public class AutoFish extends Module {
 
     @Override
     public void onTick() {
-        if (mc.player == null || mc.gameMode == null || mc.gui.screen() != null) return;
+        if (mc.player == null || mc.gameMode == null || mc.screen != null) return;
 
         Setting handModeSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Interaction Hand Mode");
         String mode = handModeSetting != null ? handModeSetting.getValString() : "Mainhand";

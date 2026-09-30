@@ -9,7 +9,7 @@ import com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils;
 import imgui.ImFont;
 import imgui.ImGui;
 import imgui.ImVec2;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
@@ -94,7 +94,7 @@ public class SpawnerFinder extends Module {
     }
 
     @Override
-    public void onRenderHUD(GuiGraphicsExtractor guiGraphics, Object tickDeltaObj) {
+    public void onRenderHUD(GuiGraphics guiGraphics, Object tickDeltaObj) {
     }
 
     private void scheduleScan() {
@@ -223,9 +223,9 @@ public class SpawnerFinder extends Module {
         int fillAlpha = (int) (num("Fill Opacity", 18) * 2.55);
         int fallback = defaultRgb();
 
-        net.minecraft.client.Camera camera = mc.gameRenderer.mainCamera();
+        net.minecraft.client.Camera camera = mc.gameRenderer.getMainCamera();
         net.minecraft.world.phys.Vec3 cam = camera.position();
-        camera.getViewRotationProjectionMatrix(matrix);
+        com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils.viewRotationProjection(matrix);
         float dw = ImGui.getIO().getDisplaySizeX();
         float dh = ImGui.getIO().getDisplaySizeY();
         imgui.ImDrawList dl = ImGui.getBackgroundDrawList();

@@ -26,6 +26,7 @@ logs/
 
 # Run directory (Minecraft)
 run/
+run-1.21.11/
 .ai_backups
 
 dist/

@@ -42,11 +42,11 @@ public class WeakDevice extends Module {
     public void setGuiOpen(boolean open) {
         this.guiOpen = open;
         if (open) {
-            if (mc.gui != null && !(mc.gui.screen() instanceof EmptyScreen)) {
+            if (mc.gui != null && !(mc.screen instanceof EmptyScreen)) {
                 mc.setScreenAndShow(new EmptyScreen());
             }
         } else {
-            if (mc.gui != null && mc.gui.screen() instanceof EmptyScreen) {
+            if (mc.gui != null && mc.screen instanceof EmptyScreen) {
                 mc.setScreenAndShow((Screen) null);
             }
         }
@@ -70,7 +70,7 @@ public class WeakDevice extends Module {
     public void renderImGuiOverlay() {
         if (!isToggled() || mc.player == null) return;
 
-        if (guiOpen && mc.gui != null && !(mc.gui.screen() instanceof EmptyScreen)) {
+        if (guiOpen && mc.gui != null && !(mc.screen instanceof EmptyScreen)) {
             guiOpen = false;
         }
 

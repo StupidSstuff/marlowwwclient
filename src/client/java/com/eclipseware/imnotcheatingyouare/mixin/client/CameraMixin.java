@@ -17,8 +17,8 @@ public abstract class CameraMixin {
 
     @Shadow protected abstract void setPosition(net.minecraft.world.phys.Vec3 pos);
 
-    @Inject(method = "alignWithEntity", at = @At("TAIL"))
-    private void onAlignWithEntity(float partialTicks, CallbackInfo ci) {
+    @Inject(method = "setup", at = @At("TAIL"))
+    private void onSetup(net.minecraft.world.level.Level level, net.minecraft.world.entity.Entity entity, boolean detachedArg, boolean mirrored, float partialTicks, CallbackInfo ci) {
         if (!Freecam.isActive()) return;
         Freecam freecam = Freecam.INSTANCE;
         this.detached = true;

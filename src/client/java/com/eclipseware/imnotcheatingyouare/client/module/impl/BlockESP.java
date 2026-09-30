@@ -10,7 +10,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCond;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -218,7 +218,7 @@ public class BlockESP extends Module {
     }
 
     @Override
-    public void onRenderHUD(GuiGraphicsExtractor guiGraphics, Object tickCounterObj) {
+    public void onRenderHUD(GuiGraphics guiGraphics, Object tickCounterObj) {
     }
 
     private void scheduleScan() {
@@ -308,9 +308,9 @@ public class BlockESP extends Module {
         float width = (float) num("Line Width", 1.5);
         int fillAlpha = (int) (num("Fill Opacity", 18) * 2.55);
 
-        net.minecraft.client.Camera camera = mc.gameRenderer.mainCamera();
+        net.minecraft.client.Camera camera = mc.gameRenderer.getMainCamera();
         net.minecraft.world.phys.Vec3 cam = camera.position();
-        camera.getViewRotationProjectionMatrix(matrix);
+        com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils.viewRotationProjection(matrix);
         float dw = ImGui.getIO().getDisplaySizeX();
         float dh = ImGui.getIO().getDisplaySizeY();
         imgui.ImDrawList dl = ImGui.getBackgroundDrawList();

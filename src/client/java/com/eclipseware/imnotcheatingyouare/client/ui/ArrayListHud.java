@@ -7,7 +7,7 @@ import com.eclipseware.imnotcheatingyouare.client.utils.FontUtils;
 import com.eclipseware.imnotcheatingyouare.client.utils.AnimationUtil;
 import com.eclipseware.imnotcheatingyouare.client.utils.remnant.Render2DEngine;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.Identifier;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -167,7 +167,7 @@ public class ArrayListHud {
         visibleThisFrame = false;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
-        float dim = com.eclipseware.imnotcheatingyouare.client.clickgui.ImGuiClickGui.isOpen() || mc.gui.screen() != null ? 0.35f : 1f;
+        float dim = com.eclipseware.imnotcheatingyouare.client.clickgui.ImGuiClickGui.isOpen() || mc.screen != null ? 0.35f : 1f;
 
         float guiScale = (float) mc.getWindow().getGuiScale();
         float k = guiScale / xyz.breadloaf.imguimc.imgui.ImguiLoader.getUiScale() * lastScale;
@@ -289,7 +289,7 @@ public class ArrayListHud {
         }
     }
 
-    public void render(GuiGraphicsExtractor guiGraphics, float partialTick) {
+    public void render(GuiGraphics guiGraphics, float partialTick) {
         Module arrayListMod = ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("ArrayList");
         if (arrayListMod == null || !arrayListMod.isToggled()) return;
 

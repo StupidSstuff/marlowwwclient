@@ -5,7 +5,7 @@ import com.eclipseware.imnotcheatingyouare.client.module.Category;
 import com.eclipseware.imnotcheatingyouare.client.module.Module;
 import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 
 public class AutoArmor extends Module {
@@ -21,7 +21,7 @@ public class AutoArmor extends Module {
     public void onTick() {
         if (mc.player == null || mc.gameMode == null || mc.level == null) return;
         
-        if (mc.gui.screen() != null && !(mc.gui.screen() instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen)) {
+        if (mc.screen != null && !(mc.screen instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen)) {
             return;
         }
 
@@ -38,13 +38,13 @@ public class AutoArmor extends Module {
                 
                 if (!currentArmor.isEmpty()) {
                     int armorContainerSlot = 8 - i; 
-                    mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, armorContainerSlot, 0, ContainerInput.QUICK_MOVE, mc.player);
+                    mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, armorContainerSlot, 0, ClickType.QUICK_MOVE, mc.player);
                     lastSwapTime = System.currentTimeMillis();
                     currentRandomDelay = 120 + (long) (Math.random() * 130);
                     return; 
                 } else {
                     int containerSlot = bestSlot < 9 ? bestSlot + 36 : bestSlot;
-                    mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, containerSlot, 0, ContainerInput.QUICK_MOVE, mc.player);
+                    mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, containerSlot, 0, ClickType.QUICK_MOVE, mc.player);
                     lastSwapTime = System.currentTimeMillis();
                     currentRandomDelay = 120 + (long) (Math.random() * 130);
                     return; 

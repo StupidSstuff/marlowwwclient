@@ -2,14 +2,13 @@
 "required": true,
 "minVersion": "0.8",
 "package": "com.eclipseware.imnotcheatingyouare.mixin.client",
-"refmap": "imnotcheatingyouare-refmap.json",
+"refmap": "client-imnotcheatingyouare-refmap.json",
 "compatibilityLevel": "JAVA_21",
 "client": [
 "NoJumpDelayMixin",
 "AutoSprintMixin",
 "LightTextureMixin",
 "GameRendererMixin",
-"LocalPlayerMixin",
 "ScreenEffectRendererMixin",
 "ParticleEngineMixin",
 "MultiPlayerGameModeMixin",
@@ -54,6 +53,10 @@
 "CameraMixin",
 "InventoryAccessor",
 "AbstractContainerScreenAccessor",
+"GameRendererAccessor",
+"ClientLevelAccessor",
+"AbstractSignEditScreenAccessor",
+"ServerboundInteractPacketAccessor",
 "TrueTypeGlyphProviderMixin"
 ],
 "injectors": {

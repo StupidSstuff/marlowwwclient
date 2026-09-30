@@ -14,15 +14,7 @@ public class ImGuiManager {
         if (initialized) return;
 
         long windowHandle = 0;
-        try {
-            for (java.lang.reflect.Field f : Minecraft.getInstance().getWindow().getClass().getDeclaredFields()) {
-                if (f.getType() == long.class) {
-                    f.setAccessible(true);
-                    windowHandle = f.getLong(Minecraft.getInstance().getWindow());
-                    break;
-                }
-            }
-        } catch (Exception e) {}
+        windowHandle = Minecraft.getInstance().getWindow().handle();
 
         if (windowHandle == 0) return;
 

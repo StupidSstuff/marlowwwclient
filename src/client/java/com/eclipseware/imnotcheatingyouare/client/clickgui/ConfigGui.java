@@ -7,7 +7,7 @@ import com.eclipseware.imnotcheatingyouare.client.ui.GlassyTheme;
 import com.eclipseware.imnotcheatingyouare.client.utils.FontUtils;
 import com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -72,7 +72,7 @@ public class ConfigGui extends Screen {
         this.addRenderableWidget(searchBox);
     }
 
-    private void drawBorder(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int color) {
+    private void drawBorder(GuiGraphics graphics, int x, int y, int w, int h, int color) {
         graphics.fill(x, y, x + w, y + 1, color);
         graphics.fill(x, y + h - 1, x + w, y + h, color);
         graphics.fill(x, y, x + 1, y + h, color);
@@ -93,7 +93,7 @@ public class ConfigGui extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         long now = System.currentTimeMillis();
         if (lastRenderTime == 0) lastRenderTime = now;
         float timeDelta = Math.min(0.1f, (now - lastRenderTime) / 1000f);
@@ -248,7 +248,7 @@ public class ConfigGui extends Screen {
             FontUtils.drawCenteredString(guiGraphics, statusMessage, toastX + toastW / 2, toastY + 6, textAlpha | 0xFFFFFF);
         }
 
-        super.extractRenderState(guiGraphics, scaledMouseX, scaledMouseY, partialTick);
+        super.render(guiGraphics, scaledMouseX, scaledMouseY, partialTick);
 
         guiGraphics.pose().popMatrix();
     }

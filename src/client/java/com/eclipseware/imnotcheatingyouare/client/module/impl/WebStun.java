@@ -64,19 +64,9 @@ public class WebStun extends Module {
         }
     }
 
-    private static java.lang.reflect.Method getHandlerMethod = null;
-    
     private static net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler getPredictionHandler() {
         if (mc.level == null) return null;
-        try {
-            if (getHandlerMethod == null) {
-                getHandlerMethod = net.minecraft.client.multiplayer.ClientLevel.class.getDeclaredMethod("getBlockStatePredictionHandler");
-                getHandlerMethod.setAccessible(true);
-            }
-            return (net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler) getHandlerMethod.invoke(mc.level);
-        } catch (Exception e) {
-            return null;
-        }
+        return ((com.eclipseware.imnotcheatingyouare.mixin.client.ClientLevelAccessor) mc.level).invokeGetBlockStatePredictionHandler();
     }
 
     private PlaceData getPlaceData(BlockPos pos) {
@@ -111,7 +101,7 @@ public class WebStun extends Module {
             seq = handler.currentSequence();
         }
 
-        mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+        mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
         mc.getConnection().send(new ServerboundUseItemOnPacket(
             net.minecraft.world.InteractionHand.MAIN_HAND, hitResult, seq
         ));

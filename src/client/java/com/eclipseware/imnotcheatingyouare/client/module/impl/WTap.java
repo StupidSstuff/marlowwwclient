@@ -111,28 +111,11 @@ public class WTap extends Module {
     }
 
     private int getKeyCode(net.minecraft.client.KeyMapping mapping) {
-        try {
-            for (java.lang.reflect.Method m : mapping.getClass().getMethods()) {
-                if (m.getParameterCount() == 0 && m.getReturnType().getName().contains("InputConstants$Key")) {
-                    Object keyObj = m.invoke(mapping);
-                    java.lang.reflect.Method getValue = keyObj.getClass().getMethod("getValue");
-                    return (int) getValue.invoke(keyObj);
-                }
-            }
-        } catch (Exception ignored) {}
         return mapping.getDefaultKey().getValue();
     }
 
     private long getWindowHandle() {
-        try {
-            for (java.lang.reflect.Field f : mc.getWindow().getClass().getDeclaredFields()) {
-                if (f.getType() == long.class) {
-                    f.setAccessible(true);
-                    return f.getLong(mc.getWindow());
-                }
-            }
-        } catch (Exception ignored) {}
-        return 0;
+        return mc.getWindow().handle();
     }
 
     @Override

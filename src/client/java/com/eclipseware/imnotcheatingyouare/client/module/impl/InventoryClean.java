@@ -9,7 +9,7 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -48,7 +48,7 @@ public class InventoryClean extends Module {
     @Override
     public void onDisable() {
         running = false;
-        if (autoOpenedInventory && mc.gui != null && mc.gui.screen() instanceof InventoryScreen) {
+        if (autoOpenedInventory && mc.gui != null && mc.screen instanceof InventoryScreen) {
             mc.setScreenAndShow((Screen) null);
         }
         autoOpenedInventory = false;
@@ -70,7 +70,7 @@ public class InventoryClean extends Module {
         nextDelay = 0L;
 
         Setting openInventorySetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Open Inventory");
-        if (openInventorySetting != null && openInventorySetting.getValBoolean() && mc.gui.screen() == null) {
+        if (openInventorySetting != null && openInventorySetting.getValBoolean() && mc.screen == null) {
             mc.setScreenAndShow(new InventoryScreen(mc.player));
             autoOpenedInventory = true;
         }
@@ -90,7 +90,7 @@ public class InventoryClean extends Module {
             if (!isToggled()) return;
             Setting inventoryOnlySetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Inventory Only");
             boolean inventoryOnly = inventoryOnlySetting != null && inventoryOnlySetting.getValBoolean();
-            shouldRun = !inventoryOnly || mc.gui.screen() instanceof InventoryScreen;
+            shouldRun = !inventoryOnly || mc.screen instanceof InventoryScreen;
         }
         if (!shouldRun) return;
 
@@ -103,7 +103,7 @@ public class InventoryClean extends Module {
         }
 
         int containerSlot = slot < 9 ? slot + 36 : slot;
-        mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, containerSlot, 1, ContainerInput.THROW, mc.player);
+        mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, containerSlot, 1, ClickType.THROW, mc.player);
 
         lastDropMs = System.currentTimeMillis();
         Setting minSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Min Delay (ms)");

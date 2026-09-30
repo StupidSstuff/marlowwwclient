@@ -29,7 +29,7 @@ public class SilentAim extends Module {
 
     @Override
     public void onTick() {
-        if (mc == null || mc.player == null || mc.level == null || mc.gui.screen() != null) {
+        if (mc == null || mc.player == null || mc.level == null || mc.screen != null) {
             target = null;
             return;
         }

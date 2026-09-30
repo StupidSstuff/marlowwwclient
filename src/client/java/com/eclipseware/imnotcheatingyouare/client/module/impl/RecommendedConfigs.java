@@ -58,7 +58,7 @@ public class RecommendedConfigs extends Module {
             currentServerConfigs.clear();
         }
 
-        if (fetched && currentServer != null && mc.gui.screen() == null && !currentServerConfigs.isEmpty()) {
+        if (fetched && currentServer != null && mc.screen == null && !currentServerConfigs.isEmpty()) {
             mc.setScreenAndShow(new ConfigRecommendationScreen(new ArrayList<>(currentServerConfigs)));
             currentServerConfigs.clear(); 
         }

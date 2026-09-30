@@ -64,8 +64,7 @@ public class ModuleUtils {
     
     public static void attackSwing() {
         if (mc.player == null || mc.player.connection == null) return;
-        mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, mc.player.getMainHandItem().getAttackAnimation(), false);
-        mc.player.connection.send(net.minecraft.network.protocol.game.ServerboundPunchPacket.INSTANCE);
+        mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
     }
 
     public static void resetServerSlot() {
@@ -94,7 +93,7 @@ public class ModuleUtils {
             handler.startPredicting();
         }
 
-        mc.player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+        mc.player.swing(InteractionHand.MAIN_HAND);
         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, hitResult);
     }
 
@@ -108,7 +107,7 @@ public class ModuleUtils {
             InteractionHand.MAIN_HAND, 0, yaw, pitch
         );
         mc.getConnection().send(packet);
-        mc.player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+        mc.player.swing(InteractionHand.MAIN_HAND);
     }
 
     public static void spoofSlot(int fakeSlot) {
@@ -127,7 +126,7 @@ public class ModuleUtils {
         BlockHitResult hitResult = new BlockHitResult(
             Vec3.atCenterOf(pos), face, pos, false
         );
-        mc.player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+        mc.player.swing(InteractionHand.MAIN_HAND);
         mc.getConnection().send(new ServerboundUseItemOnPacket(
             InteractionHand.MAIN_HAND, hitResult, 0
         ));
@@ -162,19 +161,9 @@ public class ModuleUtils {
 
     public static boolean isSpoofing = false;
 
-    private static java.lang.reflect.Method getHandlerMethod = null;
-    
     private static net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler getPredictionHandler() {
         if (mc.level == null) return null;
-        try {
-            if (getHandlerMethod == null) {
-                getHandlerMethod = net.minecraft.client.multiplayer.ClientLevel.class.getDeclaredMethod("getBlockStatePredictionHandler");
-                getHandlerMethod.setAccessible(true);
-            }
-            return (net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler) getHandlerMethod.invoke(mc.level);
-        } catch (Exception e) {
-            return null;
-        }
+        return ((com.eclipseware.imnotcheatingyouare.mixin.client.ClientLevelAccessor) mc.level).invokeGetBlockStatePredictionHandler();
     }
 
     public static class PendingPlacement {
@@ -242,7 +231,7 @@ public class ModuleUtils {
             setClientSlot(placement.targetSlot);
         }
 
-        mc.player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+        mc.player.swing(InteractionHand.MAIN_HAND);
         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, placement.hitResult);
 
         if (revertSlot != -1 && revertSlot != placement.targetSlot) {

@@ -68,7 +68,7 @@ public class Freecam extends Module {
         }
 
         prevCamPos = camPos;
-        if (mc.gui.screen() != null) return;
+        if (mc.screen != null) return;
 
         double left = 0, forward = 0, up = 0;
         if (mc.options.keyLeft.isDown()) left += 1;
@@ -102,7 +102,7 @@ public class Freecam extends Module {
     }
 
     private void reloadChunks() {
-        if (mc.level != null) mc.levelExtractor.allChanged();
+        if (mc.level != null) mc.levelRenderer.allChanged();
     }
 
     public Vec3 getCamPos(float partialTicks) {

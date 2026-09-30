@@ -6,7 +6,7 @@ import com.eclipseware.imnotcheatingyouare.client.module.Module;
 import com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils;
 import imgui.ImDrawList;
 import imgui.ImGui;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -34,7 +34,7 @@ public class Trajectories extends Module {
     }
 
     @Override
-    public void onRenderHUD(GuiGraphicsExtractor guiGraphics, Object tickDeltaObj) {
+    public void onRenderHUD(GuiGraphics guiGraphics, Object tickDeltaObj) {
     }
 
     public void renderImGuiOverlay() {

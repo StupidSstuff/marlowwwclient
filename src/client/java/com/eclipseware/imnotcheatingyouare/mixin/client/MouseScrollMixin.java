@@ -11,6 +11,6 @@ public class MouseScrollMixin {
 
     @Inject(method = "onScroll", at = @At("HEAD"))
     private void onScroll(long window, double xOffset, double yOffset, CallbackInfo ci) {
-        xyz.breadloaf.imguimc.imgui.SdlImGuiPlatform.feedScroll(yOffset);
+        xyz.breadloaf.imguimc.imgui.GlfwImGuiPlatform.feedScroll(yOffset);
     }
 }

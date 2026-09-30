@@ -60,9 +60,9 @@ public class AutoDHand extends Module {
         if (mc.player == null) return;
         AutoTotem.triggerInputPause();
 
-        if (mc.gui.screen() == null || mc.gui.screen() instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen) {
+        if (mc.screen == null || mc.screen instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen) {
             int containerId = mc.player.inventoryMenu.containerId;
-            mc.gameMode.handleContainerInput(containerId, slot, 40, net.minecraft.world.inventory.ContainerInput.SWAP, mc.player);
+            mc.gameMode.handleInventoryMouseClick(containerId, slot, 40, net.minecraft.world.inventory.ClickType.SWAP, mc.player);
         }
     }
 

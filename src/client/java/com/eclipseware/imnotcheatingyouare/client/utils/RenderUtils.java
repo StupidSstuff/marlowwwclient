@@ -5,7 +5,7 @@ import com.eclipseware.imnotcheatingyouare.client.module.Module;
 import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
@@ -18,6 +18,16 @@ public class RenderUtils {
     private static final org.joml.Vector4f transformVec = new org.joml.Vector4f();
     private static final ThreadLocal<Matrix4f> combinedMatrixBuffer = ThreadLocal.withInitial(Matrix4f::new);
 
+    public static Matrix4f viewRotationProjection(Matrix4f dest) {
+        net.minecraft.client.renderer.GameRenderer gameRenderer = mc.gameRenderer;
+        Camera camera = gameRenderer.getMainCamera();
+        float fov = ((com.eclipseware.imnotcheatingyouare.mixin.client.GameRendererAccessor) gameRenderer)
+                .invokeGetFov(camera, camera.getPartialTickTime(), true);
+        Matrix4f projection = gameRenderer.getProjectionMatrix(fov);
+        org.joml.Quaternionf rotation = camera.rotation().conjugate(new org.joml.Quaternionf());
+        return dest.set(projection).mul(new Matrix4f().rotation(rotation));
+    }
+
     public static Vector3d project2D(double x, double y, double z, float partialTicks) {
         Vector3d out = new Vector3d();
         if (project2D(x, y, z, partialTicks, out)) {
@@ -27,11 +37,11 @@ public class RenderUtils {
     }
 
     public static boolean project2D(double x, double y, double z, float partialTicks, Vector3d out) {
-        Camera camera = mc.gameRenderer.mainCamera();
+        Camera camera = mc.gameRenderer.getMainCamera();
         if (camera == null) return false;
         Vec3 camPos = camera.position();
         
-        Matrix4f combinedMatrix = camera.getViewRotationProjectionMatrix(combinedMatrixBuffer.get());
+        Matrix4f combinedMatrix = com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils.viewRotationProjection(combinedMatrixBuffer.get());
 
         transformVec.set((float)(x - camPos.x), (float)(y - camPos.y), (float)(z - camPos.z), 1.0f);
         combinedMatrix.transform(transformVec);
@@ -51,11 +61,11 @@ public class RenderUtils {
 
     public static boolean project2DImGui(double x, double y, double z, float partialTicks, Vector3d out) {
         if (mc.gameRenderer == null) return false;
-        Camera camera = mc.gameRenderer.mainCamera();
+        Camera camera = mc.gameRenderer.getMainCamera();
         if (camera == null) return false;
         Vec3 camPos = camera.position();
 
-        Matrix4f combinedMatrix = camera.getViewRotationProjectionMatrix(combinedMatrixBuffer.get());
+        Matrix4f combinedMatrix = com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils.viewRotationProjection(combinedMatrixBuffer.get());
 
         transformVec.set((float)(x - camPos.x), (float)(y - camPos.y), (float)(z - camPos.z), 1.0f);
         combinedMatrix.transform(transformVec);
@@ -86,7 +96,7 @@ public class RenderUtils {
         return camera.position();
     }
 
-    public static void drawLine2D(GuiGraphicsExtractor graphics, double x1, double y1, double x2, double y2, Color color) {
+    public static void drawLine2D(GuiGraphics graphics, double x1, double y1, double x2, double y2, Color color) {
         double length = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
         if (length < 0.01) return;
         float angle = (float) Math.atan2(y2 - y1, x2 - x1);
@@ -98,7 +108,7 @@ public class RenderUtils {
         graphics.pose().popMatrix();
     }
 
-    public static void drawCornerMarks(GuiGraphicsExtractor graphics, double minX, double minY, double maxX, double maxY, Color color) {
+    public static void drawCornerMarks(GuiGraphics graphics, double minX, double minY, double maxX, double maxY, Color color) {
         int c = color.getRGB();
         double boxW = maxX - minX;
         double boxH = maxY - minY;
@@ -158,7 +168,7 @@ public class RenderUtils {
         return new Color(20, 20, 20);
     }
 
-    public static void draw3DBox(GuiGraphicsExtractor guiGraphics, double minX, double minY, double minZ, double maxX, double maxY, double maxZ, Color faceColor, Color outlineColor, float partialTick) {
+    public static void draw3DBox(GuiGraphics guiGraphics, double minX, double minY, double minZ, double maxX, double maxY, double maxZ, Color faceColor, Color outlineColor, float partialTick) {
         Vector3d[] boxProjBuffer = new Vector3d[8];
         for (int i = 0; i < 8; i++) {
             boxProjBuffer[i] = new Vector3d();

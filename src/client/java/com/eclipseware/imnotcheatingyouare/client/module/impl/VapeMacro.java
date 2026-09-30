@@ -56,11 +56,11 @@ public class VapeMacro extends Module {
                     String regName = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().toLowerCase();
                     String displayName = stack.getHoverName().getString().toLowerCase();
                     if (regName.contains(query) || displayName.contains(query)) {
-                        mc.gameMode.handleContainerInput(
+                        mc.gameMode.handleInventoryMouseClick(
                             mc.player.inventoryMenu.containerId,
                             i,
                             originalSlot,
-                            net.minecraft.world.inventory.ContainerInput.SWAP,
+                            net.minecraft.world.inventory.ClickType.SWAP,
                             mc.player
                         );
                         targetSlot = originalSlot;

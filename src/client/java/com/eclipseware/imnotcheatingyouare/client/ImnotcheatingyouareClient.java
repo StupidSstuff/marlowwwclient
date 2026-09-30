@@ -588,8 +588,8 @@ settingsManager.rSetting(new Setting("Outline", blockESP, true));
         Runtime.getRuntime().addShutdownHook(saveHook);
 
         net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            dispatcher.register(net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("config")
-                .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("gui")
+            dispatcher.register(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal("config")
+                .then(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal("gui")
                     .executes(context -> {
                         net.minecraft.client.Minecraft.getInstance().execute(() ->
                             net.minecraft.client.Minecraft.getInstance().setScreenAndShow(new com.eclipseware.imnotcheatingyouare.client.clickgui.ConfigGui())
@@ -597,7 +597,7 @@ settingsManager.rSetting(new Setting("Outline", blockESP, true));
                         return 1;
                     })
                 )
-                .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("export")
+                .then(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal("export")
                     .executes(context -> {
                         String exp = com.eclipseware.imnotcheatingyouare.client.setting.ConfigManager.exportSpecific(moduleManager.modules);
                         net.minecraft.client.Minecraft.getInstance().keyboardHandler.setClipboard(exp);
@@ -606,16 +606,16 @@ settingsManager.rSetting(new Setting("Outline", blockESP, true));
                     })
                 )
             );
-            dispatcher.register(net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("mc")
-                .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("macro")
-                    .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("export")
+            dispatcher.register(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal("mc")
+                .then(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal("macro")
+                    .then(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal("export")
                         .executes(context -> {
                             com.eclipseware.imnotcheatingyouare.client.macro.MacroManager.exportToClipboard();
                             context.getSource().sendFeedback(net.minecraft.network.chat.Component.literal("§d[EclipseWare] §7Macro exported to clipboard!"));
                             return 1;
                         })
                     )
-                    .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("import")
+                    .then(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal("import")
                         .executes(context -> {
                             com.eclipseware.imnotcheatingyouare.client.macro.MacroManager.importFromClipboard();
                             context.getSource().sendFeedback(net.minecraft.network.chat.Component.literal("§d[EclipseWare] §7Macro imported from clipboard!"));
@@ -623,8 +623,8 @@ settingsManager.rSetting(new Setting("Outline", blockESP, true));
                         })
                     )
                 )
-                .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("enable")
-                    .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument("module", com.mojang.brigadier.arguments.StringArgumentType.word())
+                .then(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal("enable")
+                    .then(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument("module", com.mojang.brigadier.arguments.StringArgumentType.word())
                         .executes(context -> {
                             String modName = com.mojang.brigadier.arguments.StringArgumentType.getString(context, "module");
                             Module mod = moduleManager.getModule(modName);
@@ -638,8 +638,8 @@ settingsManager.rSetting(new Setting("Outline", blockESP, true));
                         })
                     )
                 )
-                .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("disable")
-                    .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument("module", com.mojang.brigadier.arguments.StringArgumentType.word())
+                .then(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal("disable")
+                    .then(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument("module", com.mojang.brigadier.arguments.StringArgumentType.word())
                         .executes(context -> {
                             String modName = com.mojang.brigadier.arguments.StringArgumentType.getString(context, "module");
                             Module mod = moduleManager.getModule(modName);
@@ -653,8 +653,8 @@ settingsManager.rSetting(new Setting("Outline", blockESP, true));
                         })
                     )
                 )
-                .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal("config")
-                    .then(net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument("module", com.mojang.brigadier.arguments.StringArgumentType.word())
+                .then(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal("config")
+                    .then(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument("module", com.mojang.brigadier.arguments.StringArgumentType.word())
                         .executes(context -> {
                             String modName = com.mojang.brigadier.arguments.StringArgumentType.getString(context, "module");
                             Module mod = moduleManager.getModule(modName);

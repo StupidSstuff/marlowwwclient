@@ -1,7 +1,7 @@
 package com.eclipseware.imnotcheatingyouare.client.ui.reworked;
 
 import com.eclipseware.imnotcheatingyouare.client.ui.CompatAbstractWidget;
-import com.eclipseware.imnotcheatingyouare.client.ui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -101,13 +101,13 @@ public final class RoundedDropdown<T> extends CompatAbstractWidget {
         int cy = y + h / 2;
         int caretCol = this.active ? ReworkedTheme.accent : ReworkedTheme.textSubtle;
         if (caretRot < 0.5f) {
-            g.extractor().fill(cx, cy - 1, cx + 7, cy, caretCol);
-            g.extractor().fill(cx + 1, cy, cx + 6, cy + 1, caretCol);
-            g.extractor().fill(cx + 2, cy + 1, cx + 5, cy + 2, caretCol);
+            g.fill(cx, cy - 1, cx + 7, cy, caretCol);
+            g.fill(cx + 1, cy, cx + 6, cy + 1, caretCol);
+            g.fill(cx + 2, cy + 1, cx + 5, cy + 2, caretCol);
         } else {
-            g.extractor().fill(cx + 2, cy - 2, cx + 5, cy - 1, caretCol);
-            g.extractor().fill(cx + 1, cy - 1, cx + 6, cy, caretCol);
-            g.extractor().fill(cx, cy, cx + 7, cy + 1, caretCol);
+            g.fill(cx + 2, cy - 2, cx + 5, cy - 1, caretCol);
+            g.fill(cx + 1, cy - 1, cx + 6, cy, caretCol);
+            g.fill(cx, cy, cx + 7, cy + 1, caretCol);
         }
     }
 
@@ -126,7 +126,7 @@ public final class RoundedDropdown<T> extends CompatAbstractWidget {
         Rounded.shadow(g, x, menuY, w, menuH, r);
         Rounded.fill(g, x, menuY, w, menuH, r, ReworkedTheme.background);
 
-        g.extractor().enableScissor(x, menuY, x + w, menuY + menuH);
+        g.enableScissor(x, menuY, x + w, menuY + menuH);
 
         hoveredIndex = -1;
         for (int i = 0; i < options.size(); i++) {
@@ -152,7 +152,7 @@ public final class RoundedDropdown<T> extends CompatAbstractWidget {
             ReworkedFont.drawString(g, optLabel, x + 10, itemY + (itemH - 8) / 2, textColor, false);
         }
 
-        g.extractor().disableScissor();
+        g.disableScissor();
 
         Rounded.outline(g, x, menuY, w, menuH, r, 1f, ReworkedTheme.controlBorderHover);
     }

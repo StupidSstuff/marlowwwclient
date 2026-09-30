@@ -74,7 +74,7 @@ public class AimAssist extends Module {
         }
 
         Setting weaponOnlySetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(this, "Weapon Only");
-        if (mc.gui.screen() != null || (weaponOnlySetting != null && weaponOnlySetting.getValBoolean() && !isHoldingWeapon())) {
+        if (mc.screen != null || (weaponOnlySetting != null && weaponOnlySetting.getValBoolean() && !isHoldingWeapon())) {
             target = null;
             lastTarget = null;
             targetOffset = Vec3.ZERO;

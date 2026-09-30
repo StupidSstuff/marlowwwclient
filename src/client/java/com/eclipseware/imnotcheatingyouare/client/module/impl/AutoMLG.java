@@ -7,7 +7,7 @@ import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
 import com.eclipseware.imnotcheatingyouare.client.utils.ModuleUtils;
 import com.eclipseware.imnotcheatingyouare.client.utils.SilentAimUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -106,7 +106,7 @@ public class AutoMLG extends Module {
                 if (invSlot != -1 && invSlot >= 9) {
                     int targetHbSlot = mc.player.getInventory().getSelectedSlot();
                     int containerId = mc.player.inventoryMenu.containerId;
-                    mc.gameMode.handleContainerInput(containerId, invSlot, targetHbSlot, ContainerInput.SWAP, mc.player);
+                    mc.gameMode.handleInventoryMouseClick(containerId, invSlot, targetHbSlot, ClickType.SWAP, mc.player);
                     retrievedFromSlot = invSlot;
                     hotbarSwapSlot = targetHbSlot;
                     mlgHotbarSlot = targetHbSlot;
@@ -152,7 +152,7 @@ public class AutoMLG extends Module {
                 ModuleUtils.switchToSlot(originalSlot);
                 if (retrievedFromSlot != -1 && hotbarSwapSlot != -1) {
                     int containerId = mc.player.inventoryMenu.containerId;
-                    mc.gameMode.handleContainerInput(containerId, retrievedFromSlot, hotbarSwapSlot, ContainerInput.SWAP, mc.player);
+                    mc.gameMode.handleInventoryMouseClick(containerId, retrievedFromSlot, hotbarSwapSlot, ClickType.SWAP, mc.player);
                 }
                 resetState();
             }
@@ -175,7 +175,7 @@ public class AutoMLG extends Module {
             ModuleUtils.switchToSlot(originalSlot);
             if (retrievedFromSlot != -1 && hotbarSwapSlot != -1 && mc.player != null && mc.gameMode != null) {
                 int containerId = mc.player.inventoryMenu.containerId;
-                mc.gameMode.handleContainerInput(containerId, retrievedFromSlot, hotbarSwapSlot, ContainerInput.SWAP, mc.player);
+                mc.gameMode.handleInventoryMouseClick(containerId, retrievedFromSlot, hotbarSwapSlot, ClickType.SWAP, mc.player);
             }
         }
         resetState();

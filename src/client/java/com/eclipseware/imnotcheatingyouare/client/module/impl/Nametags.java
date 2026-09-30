@@ -8,7 +8,7 @@ import com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils;
 import imgui.ImDrawList;
 import imgui.ImGui;
 import imgui.ImVec2;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -31,7 +31,7 @@ public class Nametags extends Module {
     private static final ImVec2 itemSizeBuf = new ImVec2();
 
     @Override
-    public void onRenderHUD(GuiGraphicsExtractor guiGraphics, Object tickDeltaObj) {
+    public void onRenderHUD(GuiGraphics guiGraphics, Object tickDeltaObj) {
     }
 
     public void renderImGuiOverlay() {

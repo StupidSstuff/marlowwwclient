@@ -9,7 +9,7 @@ import imgui.ImDrawList;
 import imgui.ImGui;
 import imgui.ImVec2;
 import net.minecraft.client.Camera;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -67,7 +67,7 @@ public class ESP extends Module {
     }
 
     @Override
-    public void onRenderHUD(GuiGraphicsExtractor guiGraphics, Object tickDeltaObj) {
+    public void onRenderHUD(GuiGraphics guiGraphics, Object tickDeltaObj) {
     }
 
     public void renderImGuiOverlay() {
@@ -299,11 +299,11 @@ public class ESP extends Module {
 
     public boolean project2DImGui(double x, double y, double z, float partialTicks, Vector3d out) {
         if (mc.gameRenderer == null) return false;
-        Camera camera = mc.gameRenderer.mainCamera();
+        Camera camera = mc.gameRenderer.getMainCamera();
         if (camera == null) return false;
         Vec3 camPos = camera.position();
 
-        Matrix4f combinedMatrix = camera.getViewRotationProjectionMatrix(combinedMatrixBuffer.get());
+        Matrix4f combinedMatrix = com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils.viewRotationProjection(combinedMatrixBuffer.get());
 
         transformVec.set((float)(x - camPos.x), (float)(y - camPos.y), (float)(z - camPos.z), 1.0f);
         combinedMatrix.transform(transformVec);

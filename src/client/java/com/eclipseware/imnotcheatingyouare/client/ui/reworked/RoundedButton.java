@@ -1,7 +1,7 @@
 package com.eclipseware.imnotcheatingyouare.client.ui.reworked;
 
 import com.eclipseware.imnotcheatingyouare.client.ui.CompatAbstractWidget;
-import com.eclipseware.imnotcheatingyouare.client.ui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;

@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.resources.Identifier;
@@ -112,7 +112,7 @@ public class FontAtlas {
     }
 
     public void render(org.joml.Matrix3x2fStack matrices, String text, float x, float y, float size, int color) {
-        GuiGraphicsExtractor context = Render2DEngine.activeContext;
+        GuiGraphics context = Render2DEngine.activeContext;
         if (context == null || text == null) return;
 
         if (name.equals("lucide") || name.equals("icons")) {
@@ -174,10 +174,10 @@ public class FontAtlas {
                 matrices.pushMatrix();
                 matrices.translate(x, y);
                 matrices.scale(scale, scale);
-                context.text(Minecraft.getInstance().font, component, 0, 0, color, false);
+                context.drawString(Minecraft.getInstance().font, component, 0, 0, color, false);
                 matrices.popMatrix();
             } else {
-                context.text(Minecraft.getInstance().font, component, (int)x, (int)y, color, false);
+                context.drawString(Minecraft.getInstance().font, component, (int)x, (int)y, color, false);
             }
         }
     }
@@ -215,7 +215,7 @@ public class FontAtlas {
     }
 
     public void renderWithShadow(org.joml.Matrix3x2fStack matrices, String text, float x, float y, float size, int color) {
-        GuiGraphicsExtractor context = Render2DEngine.activeContext;
+        GuiGraphics context = Render2DEngine.activeContext;
         if (context == null || text == null) return;
         net.minecraft.network.chat.Component component = com.eclipseware.imnotcheatingyouare.client.utils.FontUtils.get(text);
         if (size != 9.0f && size > 0) {
@@ -223,10 +223,10 @@ public class FontAtlas {
             matrices.pushMatrix();
             matrices.translate(x, y);
             matrices.scale(scale, scale);
-            context.text(Minecraft.getInstance().font, component, 0, 0, color, true);
+            context.drawString(Minecraft.getInstance().font, component, 0, 0, color, true);
             matrices.popMatrix();
         } else {
-            context.text(Minecraft.getInstance().font, component, (int)x, (int)y, color, true);
+            context.drawString(Minecraft.getInstance().font, component, (int)x, (int)y, color, true);
         }
     }
 }

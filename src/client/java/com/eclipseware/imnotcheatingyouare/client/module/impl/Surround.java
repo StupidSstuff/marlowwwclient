@@ -34,7 +34,7 @@ public class Surround extends Module {
     @Override
     public void onTick() {
         if (mc.player == null || mc.level == null) return;
-        if (mc.gui.screen() != null) return;
+        if (mc.screen != null) return;
 
         if (onlyOnGround.getValBoolean() && !mc.player.onGround()) {
             return;

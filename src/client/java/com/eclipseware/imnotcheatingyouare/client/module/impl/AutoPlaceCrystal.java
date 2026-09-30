@@ -53,7 +53,7 @@ public class AutoPlaceCrystal extends Module {
         if (mc.player == null || mc.level == null || mc.gameMode == null)
             return;
 
-        if (mc.gui.screen() != null)
+        if (mc.screen != null)
             return;
 
         if (onlyOnRightClick.getValBoolean() && !mc.options.keyUse.isDown())

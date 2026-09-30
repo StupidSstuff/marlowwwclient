@@ -25,7 +25,7 @@ public class ImguiLoader {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final long CONTENT_SCALE_REFRESH_INTERVAL_NANOS = 250_000_000L;
 
-    private static SdlImGuiPlatform imGuiPlatform = null;
+    private static GlfwImGuiPlatform imGuiPlatform = null;
     private static ImGuiImplGl3 imGuiGl3 = null;
 
     private static long windowHandle;
@@ -84,7 +84,7 @@ public class ImguiLoader {
         windowHandle = handle;
         try {
             initializeImGui();
-            imGuiPlatform = new SdlImGuiPlatform();
+            imGuiPlatform = new GlfwImGuiPlatform();
             imGuiPlatform.init(handle);
             imGuiGl3 = new ImGuiImplGl3();
             imGuiGl3.init("#version 150");
@@ -252,8 +252,8 @@ public class ImguiLoader {
     private static java.lang.ref.WeakReference<Object> targetTextureRef = new java.lang.ref.WeakReference<>(null);
     private static int currentTargetFramebuffer = 0;
 
-    private static int framebufferFor(com.mojang.renderpearl.api.textures.GpuTexture texture) {
-        if (!(texture instanceof com.mojang.renderpearl.backend.opengl.GlTexture glTexture) || texture.isClosed())
+    private static int framebufferFor(com.mojang.blaze3d.textures.GpuTexture texture) {
+        if (!(texture instanceof com.mojang.blaze3d.opengl.GlTexture glTexture) || texture.isClosed())
             return 0;
         int textureId = glTexture.glId();
         if (targetFramebuffer != 0 && targetFramebufferTexture == textureId && targetTextureRef.get() == texture)
@@ -269,7 +269,7 @@ public class ImguiLoader {
         return targetFramebuffer;
     }
 
-    public static void onFrameRender(com.mojang.renderpearl.api.textures.GpuTexture target) {
+    public static void onFrameRender(com.mojang.blaze3d.textures.GpuTexture target) {
         if (!initialized) {
             try {
                 net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
@@ -281,8 +281,8 @@ public class ImguiLoader {
         }
         if (!shouldRenderFrame())
             return;
-        com.mojang.blaze3d.platform.Window.FramebufferSize fbSize = net.minecraft.client.Minecraft.getInstance().getWindow().queryFramebufferSize();
-        if (fbSize.width() < 64 || fbSize.height() < 64)
+        com.mojang.blaze3d.platform.Window fbWindow = net.minecraft.client.Minecraft.getInstance().getWindow();
+        if (fbWindow.getWidth() < 64 || fbWindow.getHeight() < 64)
             return;
         int framebuffer = framebufferFor(target);
         if (framebuffer == 0)
@@ -373,24 +373,7 @@ public class ImguiLoader {
         }
     }
 
-    private static final Object TEXT_INPUT_OWNER = new Object();
-    private static boolean sdlTextInputActive = false;
-
     private static void syncTextInputState() {
-        boolean wantsText = ImGui.getIO().getWantTextInput();
-        if (wantsText == sdlTextInputActive)
-            return;
-
-        sdlTextInputActive = wantsText;
-        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
-        if (mc == null)
-            return;
-
-        if (wantsText) {
-            mc.textInputManager().startTextInput(TEXT_INPUT_OWNER);
-        } else {
-            mc.textInputManager().stopTextInput(TEXT_INPUT_OWNER);
-        }
     }
 
     private static void logFrameFailure(RuntimeException exception) {
@@ -481,7 +464,7 @@ public class ImguiLoader {
 
         try {
             com.mojang.blaze3d.platform.Window window = net.minecraft.client.Minecraft.getInstance().getWindow();
-            int framebufferHeight = window.queryFramebufferSize().height();
+            int framebufferHeight = window.getHeight();
             if (framebufferHeight > 0) {
                 scale = resolveUiScale(framebufferHeight);
             }
@@ -609,13 +592,6 @@ public class ImguiLoader {
     }
 
     private static void shutdownInternal() {
-        if (sdlTextInputActive) {
-            sdlTextInputActive = false;
-            try {
-                net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
-                if (mc != null) mc.textInputManager().stopTextInput(TEXT_INPUT_OWNER);
-            } catch (Throwable ignored) {}
-        }
         initialized = false;
         fontLoaded = false;
         customFontAvailable = false;
@@ -650,7 +626,7 @@ public class ImguiLoader {
             try {
                 imGuiPlatform.dispose();
             } catch (Throwable exception) {
-                LOGGER.warn("Failed to dispose the ImGui SDL platform backend", exception);
+                LOGGER.warn("Failed to dispose the ImGui platform backend", exception);
             } finally {
                 imGuiPlatform = null;
             }

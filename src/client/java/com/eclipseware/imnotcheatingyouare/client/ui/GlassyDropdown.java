@@ -1,5 +1,6 @@
 package com.eclipseware.imnotcheatingyouare.client.ui;
 
+import net.minecraft.client.gui.GuiGraphics;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;

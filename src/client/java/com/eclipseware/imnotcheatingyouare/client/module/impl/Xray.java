@@ -188,15 +188,15 @@ public class Xray extends Module {
 
     @Override
     public void onEnable() {
-        if (mc != null && mc.levelExtractor != null) {
-            mc.levelExtractor.allChanged();
+        if (mc != null && mc.levelRenderer != null) {
+            mc.levelRenderer.allChanged();
         }
     }
 
     @Override
     public void onDisable() {
-        if (mc != null && mc.levelExtractor != null) {
-            mc.levelExtractor.allChanged();
+        if (mc != null && mc.levelRenderer != null) {
+            mc.levelRenderer.allChanged();
         }
     }
 }

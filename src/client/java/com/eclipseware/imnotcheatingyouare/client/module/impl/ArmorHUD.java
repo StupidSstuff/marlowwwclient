@@ -6,7 +6,7 @@ import com.eclipseware.imnotcheatingyouare.client.module.Module;
 import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
 import com.eclipseware.imnotcheatingyouare.client.utils.FontUtils;
 import com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import java.awt.Color;
@@ -31,8 +31,8 @@ public class ArmorHUD extends Module {
     }
 
     @Override
-    public void onRenderHUD(GuiGraphicsExtractor guiGraphics, Object tickDelta) {
-        boolean inEditor = mc.gui.screen() instanceof com.eclipseware.imnotcheatingyouare.client.clickgui.HudEditorScreen;
+    public void onRenderHUD(GuiGraphics guiGraphics, Object tickDelta) {
+        boolean inEditor = mc.screen instanceof com.eclipseware.imnotcheatingyouare.client.clickgui.HudEditorScreen;
         if (!isToggled() && !inEditor) return;
         if (mc.player == null) return;
 
@@ -66,7 +66,7 @@ public class ArmorHUD extends Module {
                 x += 24;
             }
 
-            guiGraphics.item(stack, drawX, drawY);
+            guiGraphics.renderItem(stack, drawX, drawY);
 
             if (stack.isDamageableItem()) {
                 int max = stack.getMaxDamage();

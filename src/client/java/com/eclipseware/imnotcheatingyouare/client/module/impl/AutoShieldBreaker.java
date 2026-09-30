@@ -156,7 +156,7 @@ public class AutoShieldBreaker extends Module {
         if (pendingStunAttack && mc.player != null && mc.gameMode != null && stunTarget != null) {
             if (System.currentTimeMillis() >= stunAttackTime) {
                 ((com.eclipseware.imnotcheatingyouare.mixin.client.MinecraftAccessor) mc).invokeStartAttack();
-                mc.player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+                mc.player.swing(InteractionHand.MAIN_HAND);
                 pendingStunAttack = false;
                 stunTarget = null;
             }

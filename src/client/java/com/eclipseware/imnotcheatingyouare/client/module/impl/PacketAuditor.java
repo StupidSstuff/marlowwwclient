@@ -82,7 +82,7 @@ public class PacketAuditor extends Module {
         
         if (packet instanceof ServerboundInteractPacket interactPacket) {
             if (checkAttack) {
-                int targetId = interactPacket.entityId();
+                int targetId = ((com.eclipseware.imnotcheatingyouare.mixin.client.ServerboundInteractPacketAccessor) interactPacket).getEntityId();
                 Entity target = mc.level != null ? mc.level.getEntity(targetId) : null;
                 if (target != null) {
                     double distance = mc.player.distanceTo(target);
@@ -105,7 +105,7 @@ public class PacketAuditor extends Module {
     private static void log(String message) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null && getSettingVal("Log to Chat")) {
-            mc.player.sendSystemMessage(Component.literal(message));
+            mc.player.displayClientMessage(Component.literal(message), false);
         }
     }
     

@@ -9,7 +9,7 @@ import com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils;
 import imgui.ImDrawList;
 import imgui.ImGui;
 import imgui.ImVec2;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.awt.Color;
@@ -98,11 +98,11 @@ public class TargetHUD extends Module {
     }
 
     @Override
-    public void onRenderHUD(GuiGraphicsExtractor guiGraphics, Object tickDelta) {
+    public void onRenderHUD(GuiGraphics guiGraphics, Object tickDelta) {
     }
 
     public void renderImGuiOverlay() {
-        boolean inEditor = mc.gui.screen() instanceof com.eclipseware.imnotcheatingyouare.client.clickgui.HudEditorScreen;
+        boolean inEditor = mc.screen instanceof com.eclipseware.imnotcheatingyouare.client.clickgui.HudEditorScreen;
         boolean active = isToggled() || inEditor;
 
         LivingEntity activeTarget = target;

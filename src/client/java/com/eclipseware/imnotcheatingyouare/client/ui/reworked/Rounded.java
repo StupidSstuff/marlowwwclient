@@ -1,7 +1,7 @@
 package com.eclipseware.imnotcheatingyouare.client.ui.reworked;
 
-import com.eclipseware.imnotcheatingyouare.client.ui.GuiGraphics;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphics;
 
 public final class Rounded {
 
@@ -10,17 +10,17 @@ public final class Rounded {
     public static void fill(GuiGraphics g, int x, int y, int w, int h, int radius, int color) {
         if (w <= 0 || h <= 0) return;
         com.eclipseware.imnotcheatingyouare.client.utils.AnimationUtil.drawSquircleFilled(
-                g.extractor(), x, y, w, h, Math.min(radius, Math.min(w, h) / 2f), color);
+                g, x, y, w, h, Math.min(radius, Math.min(w, h) / 2f), color);
     }
 
     public static void outline(GuiGraphics g, int x, int y, int w, int h, int radius, float thickness, int color) {
         if (w <= 0 || h <= 0) return;
         com.eclipseware.imnotcheatingyouare.client.utils.AnimationUtil.drawSquircleOutline(
-                g.extractor(), x, y, w, h, Math.min(radius, Math.min(w, h) / 2f), thickness, color);
+                g, x, y, w, h, Math.min(radius, Math.min(w, h) / 2f), thickness, color);
     }
 
     public static void shadow(GuiGraphics g, int x, int y, int w, int h, int radius) {
-        GuiGraphicsExtractor e = g.extractor();
+        GuiGraphics e = g;
         int r = Math.min(radius, Math.min(w, h) / 2);
         for (int i = 6; i >= 1; i--) {
             int a = (int) (8 * i * 0.5f);

@@ -7,7 +7,7 @@ import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.ClickType;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -47,7 +47,7 @@ public class Loot extends Module {
             return;
         }
 
-        if (mc.gui.screen() instanceof ContainerScreen containerScreen) {
+        if (mc.screen instanceof ContainerScreen containerScreen) {
             if (!wasScreenOpen) {
                 openTime = System.currentTimeMillis();
                 lastClickTime = openTime;
@@ -121,11 +121,11 @@ public class Loot extends Module {
                 }
 
                 if (containerSlotId != -1) {
-                    mc.gameMode.handleContainerInput(
+                    mc.gameMode.handleInventoryMouseClick(
                             menu.containerId,
                             containerSlotId,
                             0,
-                            ContainerInput.QUICK_MOVE,
+                            ClickType.QUICK_MOVE,
                             mc.player
                     );
                     lastClickTime = now;

@@ -12,7 +12,7 @@ public class Configurator extends Module {
     @Override
     public void onEnable() {
         if (mc.level != null && mc.player != null) {
-            if (mc.gui.screen() != null) mc.gui.screen().onClose();
+            if (mc.screen != null) mc.screen.onClose();
             mc.setScreenAndShow(new ConfigGui());
         }
         this.setToggled(false); 

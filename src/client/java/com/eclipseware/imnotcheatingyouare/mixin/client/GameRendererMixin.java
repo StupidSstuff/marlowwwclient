@@ -28,8 +28,19 @@ public class GameRendererMixin {
         }
     }
 
+    @Inject(method = "displayItemActivation", at = @At("HEAD"), cancellable = true)
+    private void onDisplayItemActivation(net.minecraft.world.item.ItemStack stack, CallbackInfo ci) {
+        if (stack == null || !stack.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING)) return;
+        if (ImnotcheatingyouareClient.INSTANCE == null || ImnotcheatingyouareClient.INSTANCE.moduleManager == null) return;
+
+        com.eclipseware.imnotcheatingyouare.client.module.Module noTotemPop = ImnotcheatingyouareClient.INSTANCE.moduleManager.getModule("NoTotemPop");
+        if (noTotemPop != null && noTotemPop.isToggled()) {
+            ci.cancel();
+        }
+    }
+
     @Inject(method = "bobHurt", at = @At("HEAD"), cancellable = true)
-    private void onBobHurt(net.minecraft.client.renderer.state.level.CameraRenderState renderState, PoseStack poseStack, CallbackInfo ci) {
+    private void onBobHurt(PoseStack poseStack, float partialTick, CallbackInfo ci) {
         if (RenderOptimizer.INSTANCE != null && RenderOptimizer.INSTANCE.isToggled()) {
             Setting noHurtCam = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(RenderOptimizer.INSTANCE, "No Hurt Cam");
             if (noHurtCam != null && noHurtCam.getValBoolean()) {

@@ -3,7 +3,7 @@ package xyz.breadloaf.imguimc.screen;
 import com.eclipseware.imnotcheatingyouare.client.ImnotcheatingyouareClient;
 import com.eclipseware.imnotcheatingyouare.client.module.Module;
 import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
@@ -16,11 +16,11 @@ public class EmptyScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor drawContext, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor drawContext, int mouseX, int mouseY, float delta) {
+    public void renderBackground(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
     }
 
     @Override

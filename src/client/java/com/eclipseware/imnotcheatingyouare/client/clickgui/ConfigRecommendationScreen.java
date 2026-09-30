@@ -2,7 +2,7 @@ package com.eclipseware.imnotcheatingyouare.client.clickgui;
 
 import com.eclipseware.imnotcheatingyouare.client.module.impl.RecommendedConfigs.FoundConfig;
 import com.eclipseware.imnotcheatingyouare.client.setting.ConfigManager;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -41,8 +41,8 @@ public class ConfigRecommendationScreen extends Screen {
                 
                 this.addRenderableWidget(Button.builder(Component.literal("Load " + config.name), button -> {
                     ConfigManager.importString(config.base64);
-                    this.minecraft.player.sendSystemMessage(Component.literal("\u00A7d[EclipseWare] \u00A7aLoaded config: " + config.name));
-                    this.minecraft.player.sendSystemMessage(Component.literal("\u00A77(Tip: Press F3 + D to clear chat before screenshares)"));
+                    this.minecraft.player.displayClientMessage(Component.literal("\u00A7d[EclipseWare] \u00A7aLoaded config: " + config.name), false);
+                    this.minecraft.player.displayClientMessage(Component.literal("\u00A77(Tip: Press F3 + D to clear chat before screenshares)"), false);
                     this.minecraft.setScreenAndShow(null);
                 }).bounds(centerX - 150, configY, 300, 20).build());
                 
@@ -56,21 +56,21 @@ public class ConfigRecommendationScreen extends Screen {
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.extractBackground(guiGraphics, mouseX, mouseY, partialTick);
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.fill(0, 0, this.width, this.height, new Color(15, 15, 40, 200).getRGB());
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        super.extractRenderState(context, mouseX, mouseY, delta);
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        super.render(context, mouseX, mouseY, delta);
 
         if (promptMode) {
-            context.centeredText(this.font, "\u00a7b\u00a7l[Cloud Configs Found]", this.width / 2, this.height / 2 - 40, -1);
-            context.centeredText(this.font, "\u00a7fWe found \u00a7d" + configs.size() + " custom config" + (configs.size() == 1 ? "" : "s") + "\u00a7f for this server!", this.width / 2, this.height / 2 - 20, -1);
-            context.centeredText(this.font, "Would you like to browse and load them?", this.width / 2, this.height / 2 - 5, -1);
+            context.drawCenteredString(this.font, "\u00a7b\u00a7l[Cloud Configs Found]", this.width / 2, this.height / 2 - 40, -1);
+            context.drawCenteredString(this.font, "\u00a7fWe found \u00a7d" + configs.size() + " custom config" + (configs.size() == 1 ? "" : "s") + "\u00a7f for this server!", this.width / 2, this.height / 2 - 20, -1);
+            context.drawCenteredString(this.font, "Would you like to browse and load them?", this.width / 2, this.height / 2 - 5, -1);
         } else {
-            context.centeredText(this.font, "\u00a7b\u00a7lAvailable Server Configs", this.width / 2, 15, -1);
+            context.drawCenteredString(this.font, "\u00a7b\u00a7lAvailable Server Configs", this.width / 2, 15, -1);
             
             int yOffset = 40;
             for (FoundConfig config : configs) {
@@ -78,7 +78,7 @@ public class ConfigRecommendationScreen extends Screen {
                 if (preview.length() > 60) {
                     preview = preview.substring(0, 57) + "...";
                 }
-                context.centeredText(this.font, "\u00a77" + preview, this.width / 2, yOffset + 24, -1);
+                context.drawCenteredString(this.font, "\u00a77" + preview, this.width / 2, yOffset + 24, -1);
                 yOffset += 45;
             }
         }

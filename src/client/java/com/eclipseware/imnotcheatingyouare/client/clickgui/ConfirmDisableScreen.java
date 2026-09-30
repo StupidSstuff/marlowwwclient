@@ -1,7 +1,7 @@
 package com.eclipseware.imnotcheatingyouare.client.clickgui;
 
 import com.eclipseware.imnotcheatingyouare.client.module.impl.KeybindList;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -45,20 +45,20 @@ public class ConfirmDisableScreen extends Screen {
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.extractBackground(guiGraphics, mouseX, mouseY, partialTick);
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.fill(0, 0, this.width, this.height, new Color(40, 5, 5, 150).getRGB());
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
         
         int startY = this.height / 2 - 60;
         
-        guiGraphics.centeredText(this.font, "\u00a7c\u00a7lWARNING!", this.width / 2, startY, -1);
-        guiGraphics.centeredText(this.font, "\u00a7eKeybind List \u00a7fis being disabled.", this.width / 2, startY + 20, -1);
-        guiGraphics.centeredText(this.font, "If you load a config you aren't familiar with,", this.width / 2, startY + 35, -1);
-        guiGraphics.centeredText(this.font, "this could be bad!", this.width / 2, startY + 50, -1);
+        guiGraphics.drawCenteredString(this.font, "\u00a7c\u00a7lWARNING!", this.width / 2, startY, -1);
+        guiGraphics.drawCenteredString(this.font, "\u00a7eKeybind List \u00a7fis being disabled.", this.width / 2, startY + 20, -1);
+        guiGraphics.drawCenteredString(this.font, "If you load a config you aren't familiar with,", this.width / 2, startY + 35, -1);
+        guiGraphics.drawCenteredString(this.font, "this could be bad!", this.width / 2, startY + 50, -1);
     }
 }

@@ -9,7 +9,7 @@ import com.eclipseware.imnotcheatingyouare.client.utils.ModuleUtils;
 import com.eclipseware.imnotcheatingyouare.client.utils.RotationManager;
 import com.eclipseware.imnotcheatingyouare.client.utils.FontUtils;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -225,7 +225,7 @@ public final class BowAimbot extends Module {
     }
 
     @Override
-    public void onRenderHUD(GuiGraphicsExtractor guiGraphics, Object tickDelta) {
+    public void onRenderHUD(GuiGraphics guiGraphics, Object tickDelta) {
         if (target == null) return;
 
         String message;

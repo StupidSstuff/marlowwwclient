@@ -15,7 +15,7 @@ public class MouseButtonEventMixin {
 
     @Inject(method = "x", at = @At("RETURN"), cancellable = true)
     private void onGetX(CallbackInfoReturnable<Double> cir) {
-        Screen screen = Minecraft.getInstance().gui.screen();
+        Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof Clickgui clickgui) {
             cir.setReturnValue(cir.getReturnValue() / clickgui.getScaleFactor());
         }
@@ -23,7 +23,7 @@ public class MouseButtonEventMixin {
 
     @Inject(method = "y", at = @At("RETURN"), cancellable = true)
     private void onGetY(CallbackInfoReturnable<Double> cir) {
-        Screen screen = Minecraft.getInstance().gui.screen();
+        Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof Clickgui clickgui) {
             cir.setReturnValue(cir.getReturnValue() / clickgui.getScaleFactor());
         }

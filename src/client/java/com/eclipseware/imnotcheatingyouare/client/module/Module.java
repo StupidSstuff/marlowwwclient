@@ -59,7 +59,7 @@ public class Module {
     
     public void onTick() {}
  
-    public void onRenderHUD(net.minecraft.client.gui.GuiGraphicsExtractor guiGraphics, Object tickDelta) {}
+    public void onRenderHUD(net.minecraft.client.gui.GuiGraphics guiGraphics, Object tickDelta) {}
 
     public boolean needsTick() {
         return false;
@@ -75,13 +75,13 @@ public class Module {
         boolean isPressed = com.eclipseware.imnotcheatingyouare.client.utils.InputUtil.isDown(this.keyBind);
 
         if (holdMode) {
-            if (isPressed && !wasKeyPressed && mc.gui.screen() == null && !this.toggled) toggle();
+            if (isPressed && !wasKeyPressed && mc.screen == null && !this.toggled) toggle();
             else if (!isPressed && wasKeyPressed && this.toggled) toggle();
             wasKeyPressed = isPressed;
             return;
         }
 
-        if (mc.gui.screen() != null) {
+        if (mc.screen != null) {
             wasKeyPressed = isPressed;
             return;
         }

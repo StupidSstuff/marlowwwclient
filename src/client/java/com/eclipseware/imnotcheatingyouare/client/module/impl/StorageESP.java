@@ -7,7 +7,7 @@ import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
 import com.eclipseware.imnotcheatingyouare.client.setting.SettingsManager;
 import com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils;
 import imgui.ImGui;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
@@ -136,7 +136,7 @@ public class StorageESP extends Module {
     }
 
     @Override
-    public void onRenderHUD(GuiGraphicsExtractor guiGraphics, Object tickDeltaObj) {
+    public void onRenderHUD(GuiGraphics guiGraphics, Object tickDeltaObj) {
     }
 
     private void scheduleScan() {
@@ -231,9 +231,9 @@ public class StorageESP extends Module {
         float width = (float) num("Line Width", 1.5);
         int fillAlpha = (int) (num("Fill Opacity", 18) * 2.55);
 
-        net.minecraft.client.Camera camera = mc.gameRenderer.mainCamera();
+        net.minecraft.client.Camera camera = mc.gameRenderer.getMainCamera();
         net.minecraft.world.phys.Vec3 cam = camera.position();
-        camera.getViewRotationProjectionMatrix(matrix);
+        com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils.viewRotationProjection(matrix);
         float dw = ImGui.getIO().getDisplaySizeX();
         float dh = ImGui.getIO().getDisplaySizeY();
         imgui.ImDrawList dl = ImGui.getBackgroundDrawList();

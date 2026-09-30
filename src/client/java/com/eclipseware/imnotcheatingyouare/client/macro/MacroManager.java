@@ -193,15 +193,7 @@ public class MacroManager {
 
         long win = windowHandle;
         if (win == 0) {
-            try {
-                for (java.lang.reflect.Field f : mc.getWindow().getClass().getDeclaredFields()) {
-                    if (f.getType() == long.class) {
-                        f.setAccessible(true);
-                        win = f.getLong(mc.getWindow());
-                        break;
-                    }
-                }
-            } catch (Exception ignored) {}
+            win = mc.getWindow().handle();
         }
         if (win == 0) return;
 
@@ -220,7 +212,7 @@ public class MacroManager {
     }
 
     public static void tickKeybinds() {
-        if (mc.gui.screen() != null || mc.player == null) return;
+        if (mc.screen != null || mc.player == null) return;
 
         for (Macro m : macros) {
             if (!m.isEnabled()) continue;

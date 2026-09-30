@@ -7,9 +7,9 @@ Download releases or get early access here!
 
 We also have a GitLab!
 
-# Marlow Client V4
+# Marlow Client V4 (Minecraft 1.21.11)
 
-Marlow Client is an open-source Fabric client focused on combat automation, movement utilities, rendering tools, and quality-of-life systems for PvP-oriented gameplay. The click GUI, ESP, nametags, and HUD overlays are rendered natively with Dear ImGui rather than vanilla widgets. Newly rewritten and rearchitected for Minecraft 26.3.
+Marlow Client is an open-source Fabric client focused on combat automation, movement utilities, rendering tools, and quality-of-life systems for PvP-oriented gameplay. The click GUI, ESP, nametags, and HUD overlays are rendered natively with Dear ImGui rather than vanilla widgets. This is the maintained **Minecraft 1.21.11** branch (`mc-1.21.11`), downported from the 26.3 codebase.
 
 <a href="https://www.star-history.com/?repos=nxghtCry0%2Fmarlowwwclient&type=date&legend=top-left">
  <picture>
@@ -29,11 +29,11 @@ Marlow Client is an open-source Fabric client focused on combat automation, move
 
 ## Technology Stack
 
-[![Java](https://img.shields.io/badge/Java-25%2F26-ED8B00?logo=openjdk&logoColor=white)](https://adoptium.net/)
+[![Java](https://img.shields.io/badge/Java-21%2B-ED8B00?logo=openjdk&logoColor=white)](https://adoptium.net/)
 [![Gradle](https://img.shields.io/badge/Gradle-Build-02303A?logo=gradle&logoColor=white)](https://gradle.org/)
 [![Fabric Loader](https://img.shields.io/badge/Fabric_Loader-0.19.5-DBD0B4?logo=fabric&logoColor=black)](https://fabricmc.net/)
-[![Fabric API](https://img.shields.io/badge/Fabric_API-0.161.0%2B26.3-DBD0B4?logo=fabric&logoColor=black)](https://modrinth.com/mod/fabric-api)
-[![Minecraft](https://img.shields.io/badge/Minecraft-26.3-62B47A?logo=minecraft&logoColor=white)](https://www.minecraft.net/)
+[![Fabric API](https://img.shields.io/badge/Fabric_API-0.141.6%2B1.21.11-DBD0B4?logo=fabric&logoColor=black)](https://modrinth.com/mod/fabric-api)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-62B47A?logo=minecraft&logoColor=white)](https://www.minecraft.net/)
 [![Sponge Mixin](https://img.shields.io/badge/SpongePowered-Mixin-1E1E1E)](https://github.com/SpongePowered/Mixin)
 [![MixinExtras](https://img.shields.io/badge/MixinExtras-0.5.5-1E1E1E)](https://github.com/LlamaLad7/MixinExtras)
 [![LWJGL](https://img.shields.io/badge/LWJGL-Input%20%26%20Rendering-FFFFFF?logo=lwjgl&logoColor=black)](https://www.lwjgl.org/)
@@ -41,12 +41,29 @@ Marlow Client is an open-source Fabric client focused on combat automation, move
 
 ## Compatibility
 
-- Minecraft: `26.3` _(Legacy `1.21.11` port available on the `port-1.21.11` branch)_
-- Java: `25+` to run Gradle itself, `26` to actually launch the client (Loom's toolchain will fetch/select this automatically)
+- Minecraft: `1.21.11`
+- Java: `21+` to run the game. Gradle itself runs on the JDK set by `org.gradle.java.home` in `gradle.properties` (JDK 25 by default), and the mod is compiled to Java 21 bytecode
 - Fabric Loader: `0.19.5+`
-- Fabric API: `0.161.0+26.3`
+- Fabric API: `0.141.6+1.21.11`
+- Mappings: Mojang official mappings (`loom.officialMojangMappings()`), built with the `net.fabricmc.fabric-loom-remap` Loom plugin
 
-This build targets Minecraft 26.3's SDL3-based windowing (it replaced the previous GLFW window), so the ImGui overlay talks to input and rendering through a custom SDL bridge rather than imgui-java's stock GLFW backend.
+## Branches
+
+| Branch | Minecraft | Notes |
+| --- | --- | --- |
+| `mc-1.21.11` | 1.21.11 | This branch, maintained |
+| `main` | 26.3 | Current development |
+| `mc-26.2` | 26.2 | Port of `main` |
+| `port-1.21.11` | 1.21.11 | Old one-off port, superseded by `mc-1.21.11` |
+
+Because 1.21.11 is the last obfuscated Minecraft release, this branch differs from `main` in a few places:
+
+- Windowing is GLFW. The ImGui overlay uses a polling platform backend (`GlfwImGuiPlatform`) and `InputUtil` reads keys and mouse buttons through GLFW. `main` uses SDL3.
+- Keybinds are stored as GLFW key codes (`ConfigVersion` 1). Configs saved by the 26.x builds use SDL scancodes, so their keybinds are ignored on load and the defaults are kept. Module settings still load.
+- GUI code uses vanilla `GuiGraphics` (`render`, `renderBackground`, `renderContents`) instead of `GuiGraphicsExtractor`.
+- The first-person hand shader redirects rendering through `RenderSystem.outputColorTextureOverride` instead of hooking the render pass.
+- Nothing reflects on Minecraft members by name, since names are obfuscated at runtime in a real install. Private members are reached through accessor mixins.
+- The game runs from `run-1.21.11/` so it does not share a game directory with the 26.x builds.
 
 ## Build and Run
 

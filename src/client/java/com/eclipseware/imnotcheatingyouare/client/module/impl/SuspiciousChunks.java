@@ -377,7 +377,7 @@ public class SuspiciousChunks extends Module {
     }
 
     @Override
-    public void onRenderHUD(net.minecraft.client.gui.GuiGraphicsExtractor guiGraphics, Object tickDeltaObj) {
+    public void onRenderHUD(net.minecraft.client.gui.GuiGraphics guiGraphics, Object tickDeltaObj) {
     }
 
     private void clearAll() {
@@ -432,7 +432,7 @@ public class SuspiciousChunks extends Module {
         Map<ChunkPos, EntitySignals> tally = new HashMap<>();
 
         for (Entity entity : mc.level.entitiesForRendering()) {
-            ChunkPos pos = ChunkPos.containing(entity.blockPosition());
+            ChunkPos pos = new ChunkPos(entity.blockPosition());
             EntitySignals signals = tally.computeIfAbsent(pos, key -> new EntitySignals());
 
             if (entity instanceof ItemEntity && entity.getY() < 0.0) signals.droppedItems++;
@@ -452,8 +452,8 @@ public class SuspiciousChunks extends Module {
         ChunkPos centre = mc.player.chunkPosition();
         List<LevelChunk> due = new ArrayList<>();
 
-        for (int cx = centre.x() - radius; cx <= centre.x() + radius; cx++) {
-            for (int cz = centre.z() - radius; cz <= centre.z() + radius; cz++) {
+        for (int cx = centre.x - radius; cx <= centre.x + radius; cx++) {
+            for (int cz = centre.z - radius; cz <= centre.z + radius; cz++) {
                 ChunkPos pos = new ChunkPos(cx, cz);
                 if (inFlight.contains(pos)) continue;
                 Long at = scannedAt.get(pos);
@@ -467,8 +467,8 @@ public class SuspiciousChunks extends Module {
         if (due.isEmpty()) return;
 
         due.sort(Comparator.comparingInt(ch -> {
-            int dx = ch.getPos().x() - centre.x();
-            int dz = ch.getPos().z() - centre.z();
+            int dx = ch.getPos().x - centre.x;
+            int dz = ch.getPos().z - centre.z;
             return dx * dx + dz * dz;
         }));
 
@@ -504,7 +504,7 @@ public class SuspiciousChunks extends Module {
         if (c.detectStructure) scanStructure(chunk, analysis);
 
         if (c.highlightBlocks) {
-            suspiciousBlocks.keySet().removeIf(bp -> (bp.getX() >> 4) == pos.x() && (bp.getZ() >> 4) == pos.z());
+            suspiciousBlocks.keySet().removeIf(bp -> (bp.getX() >> 4) == pos.x && (bp.getZ() >> 4) == pos.z);
             suspiciousBlocks.putAll(found);
         }
 
@@ -1255,14 +1255,14 @@ public class SuspiciousChunks extends Module {
         Long last = notificationTimes.get(pos);
         if (!trialChamber && last != null && now - last < 45000L) return;
 
-        String message = String.format("SuspiciousChunks [%d, %d] - %s", pos.x(), pos.z(), details);
+        String message = String.format("SuspiciousChunks [%d, %d] - %s", pos.x, pos.z, details);
         boolean allowChat = trialChamber ? c.trialChamberAlerts : c.chatAlerts;
 
         recentAlerts.offer(now);
         notificationTimes.put(pos, now);
 
         mc.execute(() -> {
-            if (allowChat && mc.player != null) mc.player.sendSystemMessage(Component.literal(message));
+            if (allowChat && mc.player != null) mc.player.displayClientMessage(Component.literal(message), false);
             if (c.soundAlerts) mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.EXPERIENCE_ORB_PICKUP, 1.5f));
         });
     }
@@ -1288,15 +1288,15 @@ public class SuspiciousChunks extends Module {
     }
 
     private static boolean beyond(ChunkPos pos, ChunkPos centre, int radius) {
-        return Math.abs(pos.x() - centre.x()) > radius || Math.abs(pos.z() - centre.z()) > radius;
+        return Math.abs(pos.x - centre.x) > radius || Math.abs(pos.z - centre.z) > radius;
     }
 
     public void renderImGuiOverlay() {
         if (!isToggled() || mc.player == null || mc.level == null || mc.gameRenderer == null) return;
 
-        net.minecraft.client.Camera camera = mc.gameRenderer.mainCamera();
+        net.minecraft.client.Camera camera = mc.gameRenderer.getMainCamera();
         net.minecraft.world.phys.Vec3 cam = camera.position();
-        camera.getViewRotationProjectionMatrix(matrix);
+        com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils.viewRotationProjection(matrix);
         float dw = ImGui.getIO().getDisplaySizeX();
         float dh = ImGui.getIO().getDisplaySizeY();
         ImDrawList dl = ImGui.getBackgroundDrawList();

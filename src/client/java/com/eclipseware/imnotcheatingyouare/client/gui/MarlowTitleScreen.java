@@ -2,7 +2,7 @@ package com.eclipseware.imnotcheatingyouare.client.gui;
 
 import com.eclipseware.imnotcheatingyouare.client.utils.FontUtils;
 import com.eclipseware.imnotcheatingyouare.client.utils.remnant.Render2DEngine;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -59,7 +59,7 @@ public class MarlowTitleScreen extends TitleScreen {
         }
 
         @Override
-        protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             float ease = ease();
             hover += ((isHoveredOrFocused() ? 1f : 0f) - hover) * 0.25f;
             Render2DEngine.activeContext = graphics;
@@ -67,7 +67,7 @@ public class MarlowTitleScreen extends TitleScreen {
             Render2DEngine.drawRoundedRect(graphics.pose(), getX(), getY(), width, height, 7f, withAlpha(lerp(BUTTON, BUTTON_HOVER, hover), ease));
             int textAlpha = (int) (255 * ease);
             int textColor = (textAlpha << 24) | (secondary ? 0xE8DDFB : 0xFFFFFF);
-            graphics.centeredText(minecraft.font, FontUtils.verdana(getMessage().getString()), getX() + width / 2, getY() + (height - 8) / 2, textColor);
+            graphics.drawCenteredString(minecraft.font, FontUtils.verdana(getMessage().getString()), getX() + width / 2, getY() + (height - 8) / 2, textColor);
         }
 
         @Override
@@ -115,7 +115,7 @@ public class MarlowTitleScreen extends TitleScreen {
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         if (PastelShaderBackground.render()) {
             graphics.blit(PastelShaderBackground.TEXTURE_ID, 0, 0, width, height, 0.0f, 1.0f, 1.0f, 0.0f);
         } else {
@@ -124,8 +124,8 @@ public class MarlowTitleScreen extends TitleScreen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        extractBackground(graphics, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(graphics, mouseX, mouseY, partialTick);
         Render2DEngine.activeContext = graphics;
         float ease = ease();
 
@@ -145,12 +145,12 @@ public class MarlowTitleScreen extends TitleScreen {
         }
 
         for (MenuButton button : buttons) {
-            button.extractRenderState(graphics, mouseX, mouseY, partialTick);
+            button.render(graphics, mouseX, mouseY, partialTick);
         }
 
-        graphics.text(minecraft.font, FontUtils.verdana("Marlowww V5"), 6, height - 12, 0xB0FFFFFF, false);
+        graphics.drawString(minecraft.font, FontUtils.verdana("Marlowww V5"), 6, height - 12, 0xB0FFFFFF, false);
         String version = "Minecraft " + net.minecraft.SharedConstants.getCurrentVersion().name();
-        graphics.text(minecraft.font, FontUtils.verdana(version), width - 6 - FontUtils.verdanaWidth(version), height - 12, 0xB0FFFFFF, false);
+        graphics.drawString(minecraft.font, FontUtils.verdana(version), width - 6 - FontUtils.verdanaWidth(version), height - 12, 0xB0FFFFFF, false);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.eclipseware.imnotcheatingyouare.client.ui;
 
+import net.minecraft.client.gui.GuiGraphics;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import java.util.function.DoubleConsumer;

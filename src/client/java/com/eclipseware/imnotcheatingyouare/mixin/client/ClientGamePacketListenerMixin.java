@@ -71,8 +71,8 @@ public class ClientGamePacketListenerMixin {
         if (jumpReset == null || !jumpReset.isToggled()) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
-        if (packet.id() == mc.player.getId()) {
-            net.minecraft.world.phys.Vec3 velocity = packet.movement();
+        if (packet.getId() == mc.player.getId()) {
+            net.minecraft.world.phys.Vec3 velocity = packet.getMovement();
             double velocityMagnitude = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
             com.eclipseware.imnotcheatingyouare.client.setting.Setting thresholdSetting = ImnotcheatingyouareClient.INSTANCE.settingsManager.getSettingByName(jumpReset, "Velocity Threshold");
             double threshold = thresholdSetting != null ? thresholdSetting.getValDouble() : 0.1;

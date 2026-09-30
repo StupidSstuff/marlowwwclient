@@ -33,14 +33,9 @@ public class BreachSwap extends Module {
         if (mode.equals("Silent")) {
             if (mc.getConnection() != null) {
                 mc.getConnection().send(new ServerboundSetCarriedItemPacket(maceSlot));
-                mc.getConnection().send(new ServerboundInteractPacket(
-                    target.getId(),
-                    net.minecraft.world.InteractionHand.MAIN_HAND,
-                    target.position(),
-                    player.isShiftKeyDown()
-                ));
+                mc.getConnection().send(ServerboundInteractPacket.createInteractionPacket(target, player.isShiftKeyDown(), net.minecraft.world.InteractionHand.MAIN_HAND, target.position()));
             }
-            player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+            player.swing(InteractionHand.MAIN_HAND);
             player.resetAttackStrengthTicker();
             needsSwapBack = true;
             originalSlot = oldSlot;

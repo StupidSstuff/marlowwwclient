@@ -28,11 +28,11 @@ public class KeybindWeb extends Module {
             for (int i = 9; i < 36; i++) {
                 ItemStack stack = mc.player.getInventory().getItem(i);
                 if (stack.is(Items.COBWEB)) {
-                    mc.gameMode.handleContainerInput(
+                    mc.gameMode.handleInventoryMouseClick(
                         mc.player.inventoryMenu.containerId,
                         i,
                         originalSlot,
-                        net.minecraft.world.inventory.ContainerInput.SWAP,
+                        net.minecraft.world.inventory.ClickType.SWAP,
                         mc.player
                     );
                     webSlot = originalSlot;
@@ -48,7 +48,7 @@ public class KeybindWeb extends Module {
             }
             
             ((MinecraftAccessor) mc).invokeStartUseItem();
-            mc.player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+            mc.player.swing(InteractionHand.MAIN_HAND);
 
             if (!swapped) {
                 ModuleUtils.switchToSlot(originalSlot);

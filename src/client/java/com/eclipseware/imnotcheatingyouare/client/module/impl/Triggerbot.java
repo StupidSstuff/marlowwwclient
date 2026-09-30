@@ -130,7 +130,7 @@ public class Triggerbot extends Module {
         long now = System.currentTimeMillis();
         boolean down = mc.options.keyAttack.isDown();
 
-        if (pauseInGui.getValBoolean() && mc.gui.screen() != null) {
+        if (pauseInGui.getValBoolean() && mc.screen != null) {
             resetEngagement();
             return;
         }
@@ -327,7 +327,7 @@ public class Triggerbot extends Module {
         if (!tb.requireLeftClick.getValBoolean() || !tb.ignoreFirstClick.getValBoolean()) return false;
 
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.gui.screen() != null) return false;
+        if (mc.player == null || mc.level == null || mc.screen != null) return false;
         if (!tb.weaponReady()) return false;
 
         HitResult hit = mc.hitResult;
@@ -336,7 +336,7 @@ public class Triggerbot extends Module {
 
     public boolean shouldBlock(Entity target) {
         if (!this.isToggled() || mc.player == null || mc.level == null) return false;
-        if (mc.gui.screen() != null) return false;
+        if (mc.screen != null) return false;
         if (mc.hitResult == null || mc.hitResult.getType() != HitResult.Type.ENTITY) return false;
         if (target != ((EntityHitResult) mc.hitResult).getEntity()) return false;
         if (!isValidTarget(target)) return false;

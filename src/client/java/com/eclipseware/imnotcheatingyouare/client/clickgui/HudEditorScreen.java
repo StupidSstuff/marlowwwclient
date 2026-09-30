@@ -3,10 +3,10 @@ package com.eclipseware.imnotcheatingyouare.client.clickgui;
 import com.eclipseware.imnotcheatingyouare.client.ImnotcheatingyouareClient;
 import com.eclipseware.imnotcheatingyouare.client.module.Module;
 import com.eclipseware.imnotcheatingyouare.client.setting.Setting;
-import com.eclipseware.imnotcheatingyouare.client.ui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphics;
 import com.eclipseware.imnotcheatingyouare.client.utils.FontUtils;
 import com.eclipseware.imnotcheatingyouare.client.utils.RenderUtils;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -29,7 +29,7 @@ public class HudEditorScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         context.fill(0, 0, this.width, this.height, 0x80000000);
 
         for (Module m : ImnotcheatingyouareClient.INSTANCE.moduleManager.modules) {
@@ -62,7 +62,7 @@ public class HudEditorScreen extends Screen {
         FontUtils.drawCenteredString(context, "Drag boxes with left-click to move. Press ESC to save & exit.", this.width / 2, 22, 0xFFBBBBBB);
     }
 
-    private void drawBorder(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int color) {
+    private void drawBorder(GuiGraphics graphics, int x, int y, int w, int h, int color) {
         graphics.fill(x, y, x + w, y + 1, color);
         graphics.fill(x, y + h - 1, x + w, y + h, color);
         graphics.fill(x, y, x + 1, y + h, color);

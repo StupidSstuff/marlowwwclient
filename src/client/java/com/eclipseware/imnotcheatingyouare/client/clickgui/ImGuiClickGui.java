@@ -16,7 +16,7 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.Identifier;
 import xyz.breadloaf.imguimc.screen.EmptyScreen;
@@ -98,7 +98,7 @@ public class ImGuiClickGui {
             open = false;
             menuMode = false;
             settingsModule = null;
-            if (mc.gui != null && mc.gui.screen() instanceof com.eclipseware.imnotcheatingyouare.client.gui.MenuConfigScreen screen) {
+            if (mc.gui != null && mc.screen instanceof com.eclipseware.imnotcheatingyouare.client.gui.MenuConfigScreen screen) {
                 mc.setScreenAndShow(screen.parent());
             }
             return;
@@ -111,10 +111,10 @@ public class ImGuiClickGui {
         if (mc.gui == null) return;
 
         if (value) {
-            if (!(mc.gui.screen() instanceof EmptyScreen)) {
+            if (!(mc.screen instanceof EmptyScreen)) {
                 mc.setScreenAndShow(new EmptyScreen());
             }
-        } else if (mc.gui.screen() instanceof EmptyScreen) {
+        } else if (mc.screen instanceof EmptyScreen) {
             mc.setScreenAndShow((Screen) null);
         }
     }
@@ -179,7 +179,7 @@ public class ImGuiClickGui {
         if (!open) return;
         Minecraft mc = Minecraft.getInstance();
         if (menuMode) {
-            if (mc.gui == null || !(mc.gui.screen() instanceof com.eclipseware.imnotcheatingyouare.client.gui.MenuConfigScreen)) {
+            if (mc.gui == null || !(mc.screen instanceof com.eclipseware.imnotcheatingyouare.client.gui.MenuConfigScreen)) {
                 markClosed();
             }
             return;
@@ -188,7 +188,7 @@ public class ImGuiClickGui {
             markClosed();
             return;
         }
-        if (!(mc.gui.screen() instanceof EmptyScreen)) {
+        if (!(mc.screen instanceof EmptyScreen)) {
             markClosed();
         }
     }
@@ -278,7 +278,7 @@ public class ImGuiClickGui {
     private static int resolveLogoTexture() {
         try {
             net.minecraft.client.renderer.texture.AbstractTexture tex = Minecraft.getInstance().getTextureManager().getTexture(LOGO_ID);
-            if (tex != null && tex.getTexture() instanceof com.mojang.renderpearl.backend.opengl.GlTexture gl)
+            if (tex != null && tex.getTexture() instanceof com.mojang.blaze3d.opengl.GlTexture gl)
                 return com.eclipseware.imnotcheatingyouare.client.utils.ImGuiTextures.prepare(gl.glId(), true);
         } catch (Throwable ignored) {
         }

@@ -1,6 +1,6 @@
 package com.eclipseware.imnotcheatingyouare.client.ui.reworked;
 
-import com.eclipseware.imnotcheatingyouare.client.ui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
@@ -38,18 +38,18 @@ public final class ReworkedFont {
 
     public static void drawString(GuiGraphics g, String text, int x, int y, int color, boolean shadow) {
         Font font = Minecraft.getInstance().font;
-        g.extractor().text(font, wrap(text), x, y, color, shadow);
+        g.drawString(font, wrap(text), x, y, color, shadow);
     }
 
     public static void drawCenteredString(GuiGraphics g, String text, int x, int y, int color) {
         Font font = Minecraft.getInstance().font;
-        g.extractor().centeredText(font, wrap(text), x, y, color);
+        g.drawCenteredString(font, wrap(text), x, y, color);
     }
 
     public static void drawRightAlignedString(GuiGraphics g, String text, int rightX, int y, int color) {
         Font font = Minecraft.getInstance().font;
         int w = font.width(wrap(text));
-        g.extractor().text(font, wrap(text), rightX - w, y, color, false);
+        g.drawString(font, wrap(text), rightX - w, y, color, false);
     }
 
     public static int width(String text) {

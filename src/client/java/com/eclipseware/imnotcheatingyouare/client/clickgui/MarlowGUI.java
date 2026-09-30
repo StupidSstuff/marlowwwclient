@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -193,7 +193,7 @@ public class MarlowGUI extends Screen {
     return height;
   }
   
-  private void renderSetting(Setting setting, GuiGraphicsExtractor context, Vector2f position, float moduleY, FontAtlas font, int mouseX, int mouseY) {
+  private void renderSetting(Setting setting, GuiGraphics context, Vector2f position, float moduleY, FontAtlas font, int mouseX, int mouseY) {
     float posX = position.x();
     float maxTextWidth = 98.0F;
     if (setting.isCheck()) {
@@ -372,7 +372,7 @@ public class MarlowGUI extends Screen {
   }
 
   
-  public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+  public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
     Render2DEngine.activeContext = context;
     int currentWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth();
     int currentHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
@@ -382,7 +382,7 @@ public class MarlowGUI extends Screen {
       this.lastScreenHeight = currentHeight;
     } 
     if ((Minecraft.getInstance()).level == null) {
-      super.extractBackground(context, mouseX, mouseY, delta);
+      super.renderBackground(context, mouseX, mouseY, delta);
     }
     FontAtlas inter = Fonts.getInstance().getInterSemiBold();
     FontAtlas icons = Fonts.getInstance().getLucide();
@@ -960,20 +960,12 @@ public class MarlowGUI extends Screen {
   private void checkSearchEasterEgg() {
     if (this.searchQuery.equalsIgnoreCase("protien powder")) {
       try {
-        java.lang.reflect.Field field = net.minecraft.client.Options.class.getDeclaredField("soundSourceVolumes");
-        field.setAccessible(true);
-        java.util.Map<net.minecraft.sounds.SoundSource, net.minecraft.client.OptionInstance<Double>> map = 
-          (java.util.Map<net.minecraft.sounds.SoundSource, net.minecraft.client.OptionInstance<Double>>) field.get(net.minecraft.client.Minecraft.getInstance().options);
-        map.get(net.minecraft.sounds.SoundSource.MASTER).set(500.0);
+        net.minecraft.client.Minecraft.getInstance().options.getSoundSourceOptionInstance(net.minecraft.sounds.SoundSource.MASTER).set(500.0);
         net.minecraft.client.Minecraft.getInstance().options.save();
       } catch (Exception ignored) {}
     } else if (this.searchQuery.equalsIgnoreCase("sweet powder")) {
       try {
-        java.lang.reflect.Field field = net.minecraft.client.Options.class.getDeclaredField("soundSourceVolumes");
-        field.setAccessible(true);
-        java.util.Map<net.minecraft.sounds.SoundSource, net.minecraft.client.OptionInstance<Double>> map = 
-          (java.util.Map<net.minecraft.sounds.SoundSource, net.minecraft.client.OptionInstance<Double>>) field.get(net.minecraft.client.Minecraft.getInstance().options);
-        map.get(net.minecraft.sounds.SoundSource.MASTER).set(1.0);
+        net.minecraft.client.Minecraft.getInstance().options.getSoundSourceOptionInstance(net.minecraft.sounds.SoundSource.MASTER).set(1.0);
         net.minecraft.client.Minecraft.getInstance().options.save();
       } catch (Exception ignored) {}
     }
@@ -1022,7 +1014,7 @@ public class MarlowGUI extends Screen {
   }
   public boolean isPauseScreen() {
     return false;
-  } public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {}
+  } public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {}
   private float easeInOutCubic(float t) {
     return (float)((t < 0.5D) ? (4.0F * t * t * t) : (1.0D - Math.pow((-2.0F * t + 2.0F), 3.0D) / 2.0D));
   }

@@ -17,14 +17,9 @@ public class AutoSign extends Module {
     public static void handleScreen(AbstractSignEditScreen screen) {
         if (savedLines != null && Minecraft.getInstance().player != null) {
             try {
-                java.lang.reflect.Field signField = AbstractSignEditScreen.class.getDeclaredField("sign");
-                signField.setAccessible(true);
-                net.minecraft.world.level.block.entity.SignBlockEntity signEntity = (net.minecraft.world.level.block.entity.SignBlockEntity) signField.get(screen);
+                net.minecraft.world.level.block.entity.SignBlockEntity signEntity = ((com.eclipseware.imnotcheatingyouare.mixin.client.AbstractSignEditScreenAccessor) screen).getSign();
                 
-                net.minecraft.world.level.block.entity.SignTextSlot slot = isFront
-                        ? net.minecraft.world.level.block.entity.SignTextSlot.FRONT
-                        : net.minecraft.world.level.block.entity.SignTextSlot.BACK;
-                Minecraft.getInstance().getConnection().send(new ServerboundSignUpdatePacket(signEntity.getBlockPos(), java.util.List.of(savedLines), slot));
+                Minecraft.getInstance().getConnection().send(new ServerboundSignUpdatePacket(signEntity.getBlockPos(), isFront, savedLines.length > 0 ? savedLines[0] : "", savedLines.length > 1 ? savedLines[1] : "", savedLines.length > 2 ? savedLines[2] : "", savedLines.length > 3 ? savedLines[3] : ""));
                 screen.onClose();
             } catch (Exception ignored) {}
         }

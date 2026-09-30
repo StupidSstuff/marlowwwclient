@@ -111,7 +111,7 @@ public final class CartHelper {
         InteractionHand hand = InteractionHand.MAIN_HAND;
         ModuleUtils.switchToSlot(slot);
         InteractionResult result = mc.gameMode.useItemOn(mc.player, hand, hit);
-        if (result.consumesAction()) mc.player.swing(hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+        if (result.consumesAction()) mc.player.swing(hand);
         return result.consumesAction();
     }
 
